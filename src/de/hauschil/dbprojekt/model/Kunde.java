@@ -7,6 +7,8 @@ import java.util.Random;
 import de.hauschil.dbprojekt.controller.Helper;
 
 public class Kunde {
+	private static Random r = new Random(42);
+	
 	private String nachname;
 	private String vorname;
 	
@@ -19,11 +21,10 @@ public class Kunde {
 		telefone.add(tel);
 	}
 	
-	public static Kunde[] generateKunden(int faktor) {
-		Kunde[] kunden = new Kunde[faktor * 100];
-		Random r = new Random(42);
+	public static Kunde[] generateKunden(int anzahl) {
+		Kunde[] kunden = new Kunde[anzahl];
 		
-		for (int i = 0; i < faktor * 100; i++) {
+		for (int i = 0; i < anzahl; i++) {
 			kunden[i] = new Kunde(
 				Helper.vornamen[r.nextInt(Helper.vornamen.length)],
 				Helper.nachnamen[r.nextInt(Helper.nachnamen.length)],

@@ -1,7 +1,11 @@
 package de.hauschil.dbprojekt.model;
 
+import java.text.DateFormat;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.Random;
+import static de.hauschil.dbprojekt.controller.Helper.*;
 
 public class Anruf {
 	private static Random r = new Random(42);
@@ -19,26 +23,28 @@ public class Anruf {
 		this.dauer = dauer;
 	}
 	
-	public static Anruf[] generateAnrufe(Kunde[] k, int faktor) {
-		Anruf[] an = new Anruf[k.length * faktor * 3];
-		long cur_millis = new Date().getTime();
+	public static Anruf[] generateAnrufe(Kunde[] kunden, int anzahlProMonat) {
+		Anruf[] an = new Anruf[kunden.length * anzahlProMonat * 12];
 		
 		/* mache fuer jeden Kunden folgendes */
-		for (int i = 0; i < k.length; i++) {
-			Kunde[] partner = new Kunde[faktor];
+		for (int i = 0; i < kunden.length; i++) {
+			Kunde[] partner = new Kunde[ANZ_PARTNER];
 			/* Generiere erst die Partner */
-			for (int j = 0; j < partner.length; j++) {
-				partner[j] = k[r.nextInt(k.length)];
+			for (int j = 0; j < ANZ_PARTNER; j++) {
+				partner[j] = kunden[r.nextInt(kunden.length)];
 			}
-			/* Nun generiere die Anrufe */
-			for (int j = 0; j < faktor * 3; j++) {
-				an[i * faktor * 3 + j] = new Anruf(
-					k[i].getTelefone().get(0),
-					partner[r.nextInt(partner.length)].getTelefone().get(0),
-					/* Ein Datum aus dem letzten Jahr generieren */
-					new Date(cur_millis - Math.abs(r.nextLong() % (1000L * 60L * 60L * 24L * 365L))),
-					r.nextInt(3600)
-				);
+			/* jeden Monat */
+			for (int month = 0; month < 12; month++) {
+				/* Nun generiere die Anrufe pro Monat */
+				for (int j = 0; j < anzahlProMonat; j++) {
+					/* Jeder Kunde 12 Monate * jeden Monat anzahlProMonat */
+					an[i * 12 * anzahlProMonat + month * anzahlProMonat + j] = new Anruf(
+						kunden[i].getTelefone().get(0),
+						partner[r.nextInt(partner.length)].getTelefone().get(0),
+						generateDate(month),
+						r.nextInt(3600)
+					);
+				}
 			}
 		}
 		return an;
@@ -48,5 +54,16 @@ public class Anruf {
 	public String toString() {
 		return "Anruf [anrufer=" + anrufer + ", angerufener=" + angerufener
 				+ ", dauer=" + dauer + ", datum=" + datum + "]";
+	}
+	
+	/* Ein random Datum aus 2012 generieren */
+	private static Date generateDate(int month) {
+		GregorianCalendar cal = new GregorianCalendar(2012, month, 1);
+		cal.set(Calendar.DAY_OF_MONTH, r.nextInt(cal.getActualMaximum(Calendar.DAY_OF_MONTH)));
+		cal.set(Calendar.HOUR_OF_DAY, r.nextInt(24));
+		cal.set(Calendar.MINUTE, r.nextInt(60));
+		cal.set(Calendar.SECOND, r.nextInt(60));
+		
+		return cal.getTime();
 	}
 }
