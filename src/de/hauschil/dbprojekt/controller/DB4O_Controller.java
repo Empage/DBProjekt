@@ -1,7 +1,11 @@
 package de.hauschil.dbprojekt.controller;
 
+import java.util.List;
+
 import com.db4o.Db4oEmbedded;
 import com.db4o.ObjectContainer;
+import com.db4o.query.Predicate;
+
 import static de.hauschil.dbprojekt.controller.Main.*;
 
 public class DB4O_Controller implements DB_Controller {
@@ -9,7 +13,7 @@ public class DB4O_Controller implements DB_Controller {
 	
 	@Override
 	public void initDBConnection() {
-		db = Db4oEmbedded.openFile(Db4oEmbedded.newConfiguration (), DB_PATH);
+		db = Db4oEmbedded.openFile(Db4oEmbedded.newConfiguration(), DB_PATH);
 	}
 
 	@Override
@@ -25,6 +29,11 @@ public class DB4O_Controller implements DB_Controller {
 	@Override
 	public void closeDBConncetion() {
 		db.close();
+	}
+
+	@Override
+	public List query(Object o) {
+		return db.query((Predicate) o);
 	}
 	
 

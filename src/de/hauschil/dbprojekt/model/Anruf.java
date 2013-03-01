@@ -26,11 +26,21 @@ public class Anruf {
 		this.dauer = dauer;
 	}
 	
-	public static Anruf[] generateAnrufe(Kunde[] kunden, int anzahlProMonat, DB_Controller db) {
-		Anruf[] an = new Anruf[kunden.length * anzahlProMonat * 12];
-		
+	public Date getDatum() {
+		return datum;
+	}
+
+	public void setDatum(Date datum) {
+		this.datum = datum;
+	}
+
+	public static void generateAnrufe(Kunde[] kunden, int anzahlProMonat, DB_Controller db) {
+		float fortschritt = 2.0f;
+		System.out.println("                     10   20   30   40   50   60   70   80   90  100");
+		System.out.print("Generiere Anrufe: ");
 		/* mache fuer jeden Kunden folgendes */
 		for (int i = 0; i < kunden.length; i++) {
+			Anruf[] an = new Anruf[anzahlProMonat * 12];
 			Kunde[] partner = new Kunde[ANZ_PARTNER];
 			/* Generiere erst die Partner */
 			for (int j = 0; j < ANZ_PARTNER; j++) {
@@ -40,8 +50,7 @@ public class Anruf {
 			for (int month = 0; month < 12; month++) {
 				/* Nun generiere die Anrufe pro Monat */
 				for (int j = 0; j < anzahlProMonat; j++) {
-					/* Jeder Kunde 12 Monate * jeden Monat anzahlProMonat */
-					an[i * 12 * anzahlProMonat + month * anzahlProMonat + j] = new Anruf(
+					an[month * anzahlProMonat + j] = new Anruf(
 						kunden[i].getTelefone().get(0),
 						partner[r.nextInt(partner.length)].getTelefone().get(0),
 						generateDate(month),
@@ -49,9 +58,17 @@ public class Anruf {
 					);
 				}
 			}
-			//TODO hier db zeugs
+			db.storeObject(an);
+			if (i % 100 == 99) {
+				db.commit();
+			}
+			if (((float) i / kunden.length * 100) > fortschritt) {
+				fortschritt += 2;
+				System.out.print("+");
+			}
 		}
-		return an;
+		System.out.println();
+		System.out.println(anzahlProMonat * 12 * ANZ_KUNDEN + " Anrufe generiert");
 	}
 
 	@Override
