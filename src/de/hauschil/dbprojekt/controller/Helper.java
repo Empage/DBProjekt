@@ -1,11 +1,6 @@
 package de.hauschil.dbprojekt.controller;
 
 public class Helper {
-	public static final int FAKTOR 		= 50;
-	public static final int ANZ_KUNDEN 	= 100 * FAKTOR;
-	public static final int ANZ_PARTNER = FAKTOR;
-	public static final int ANZ_ANRUFPM	= 3 * FAKTOR;
-	
 	public static String[] vornamen = {
 		"Agnes", "Agnieszka", "Alexandra", "Alina", "Alma", "Amelie", "Andrea", 
 		"Anett", "Anette", "Angela", "Angelica", "Angelika", "Anica", "Anika", 

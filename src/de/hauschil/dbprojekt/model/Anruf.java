@@ -5,7 +5,10 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.Random;
-import static de.hauschil.dbprojekt.controller.Helper.*;
+
+import de.hauschil.dbprojekt.controller.DB4O_Controller;
+import de.hauschil.dbprojekt.controller.DB_Controller;
+import static de.hauschil.dbprojekt.controller.Main.*;
 
 public class Anruf {
 	private static Random r = new Random(42);
@@ -23,7 +26,7 @@ public class Anruf {
 		this.dauer = dauer;
 	}
 	
-	public static Anruf[] generateAnrufe(Kunde[] kunden, int anzahlProMonat) {
+	public static Anruf[] generateAnrufe(Kunde[] kunden, int anzahlProMonat, DB_Controller db) {
 		Anruf[] an = new Anruf[kunden.length * anzahlProMonat * 12];
 		
 		/* mache fuer jeden Kunden folgendes */
@@ -46,6 +49,7 @@ public class Anruf {
 					);
 				}
 			}
+			//TODO hier db zeugs
 		}
 		return an;
 	}
