@@ -33,7 +33,8 @@ public class DB4O_Controller implements DB_Controller {
 
 	@Override
 	public List query(Object o) {
-		return db.query((Predicate) o);
+//		return db.query((Predicate) o);
+		return db.queryByExample(o);
 	}
 	
 

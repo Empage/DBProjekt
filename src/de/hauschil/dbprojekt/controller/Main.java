@@ -29,7 +29,7 @@ public class Main {
 		db.initDBConnection();
 		List<Anruf> anruf = db.query(new Predicate<Anruf>() {
 			public boolean match(Anruf k) {
-				return k.getDatum().getMonth() == 11;
+				return true;
 			}
 		});
 		for (Anruf a : anruf)
