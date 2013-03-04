@@ -14,21 +14,21 @@ public class Kunde {
 	
 	private ArrayList<Telefon> telefone;
 	
-	public Kunde(String vorname, String nachname, Telefon tel) {
+	public Kunde(String vorname, String nachname, ArrayList<Telefon> tel) {
 		this.nachname = nachname;
 		this.vorname = vorname;
-		telefone = new ArrayList<>(1);
-		telefone.add(tel);
+		telefone = tel;
 	}
 	
 	public static Kunde[] generateKunden(int anzahl) {
 		Kunde[] kunden = new Kunde[anzahl];
 		
+		/* generiere einen Kunden mit bis zu 5 Telefonen und random Vor- und Nachnamen*/
 		for (int i = 0; i < anzahl; i++) {
 			kunden[i] = new Kunde(
 				Helper.vornamen[r.nextInt(Helper.vornamen.length)],
 				Helper.nachnamen[r.nextInt(Helper.nachnamen.length)],
-				Telefon.generateTelefon(1)[0]
+				Telefon.generateTelefon(r.nextInt(5) + 1)
 			);
 		}
 		

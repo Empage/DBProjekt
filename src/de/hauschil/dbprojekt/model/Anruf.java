@@ -33,6 +33,12 @@ public class Anruf {
 	public void setDatum(Date datum) {
 		this.datum = datum;
 	}
+	
+	@Override
+	public String toString() {
+		return "Anruf [anrufer=" + anrufer + ", angerufener=" + angerufener
+				+ ", dauer=" + dauer + ", datum=" + datum + "]";
+	}
 
 	public static void generateAnrufe(Kunde[] kunden, int anzahlProMonat, DB_Controller db) {
 		float fortschritt = 2.0f;
@@ -50,9 +56,12 @@ public class Anruf {
 			for (int month = 0; month < 12; month++) {
 				/* Nun generiere die Anrufe pro Monat */
 				for (int j = 0; j < anzahlProMonat; j++) {
+					int next_partner = r.nextInt(partner.length);
+					int next_partner_telefon = r.nextInt(partner[next_partner].getTelefone().size());
+					int next_telefon = r.nextInt(kunden[i].getTelefone().size());
 					an[month * anzahlProMonat + j] = new Anruf(
-						kunden[i].getTelefone().get(0),
-						partner[r.nextInt(partner.length)].getTelefone().get(0),
+						kunden[i].getTelefone().get(next_telefon),
+						partner[next_partner].getTelefone().get(next_partner_telefon),
 						generateDate(month),
 						r.nextInt(3600)
 					);
@@ -69,12 +78,6 @@ public class Anruf {
 		}
 		System.out.println();
 		System.out.println(anzahlProMonat * 12 * ANZ_KUNDEN + " Anrufe generiert");
-	}
-
-	@Override
-	public String toString() {
-		return "Anruf [anrufer=" + anrufer + ", angerufener=" + angerufener
-				+ ", dauer=" + dauer + ", datum=" + datum + "]";
 	}
 	
 	/* Ein random Datum aus 2012 generieren */

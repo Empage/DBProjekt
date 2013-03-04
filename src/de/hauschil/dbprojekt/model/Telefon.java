@@ -1,5 +1,6 @@
 package de.hauschil.dbprojekt.model;
 
+import java.util.ArrayList;
 import java.util.Random;
 
 import de.hauschil.dbprojekt.controller.Helper;
@@ -19,14 +20,13 @@ public class Telefon {
 		return "" + nummer;
 	}
 	
-	public static Telefon[] generateTelefon(int count) {
-		Telefon[] tels = new Telefon[count];
-		
+	public static ArrayList<Telefon> generateTelefon(int count) {
+		ArrayList<Telefon> tels = new ArrayList<>(count);
 		
 		for (int i = 0; i < count; i++) {
-			tels[i] = new Telefon(
+			tels.add(new Telefon(
 				Helper.vorwahlen[r.nextInt(Helper.vorwahlen.length)] + "/" + base++ + r.nextInt(100)
-			);
+			));
 		}
 		
 		return tels;
