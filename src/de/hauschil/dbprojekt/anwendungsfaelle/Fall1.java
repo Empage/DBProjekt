@@ -21,13 +21,13 @@ public class Fall1 {
 		gesuchte = Kunde.generateKunden(1000);
 	}
 	
-	public void run() {
+	public void run(boolean indexed) {
 		EmbeddedConfiguration conf = Db4oEmbedded.newConfiguration();
-		conf.common().objectClass(Kunde.class).objectField("vorname").indexed(false);
-		conf.common().objectClass(Kunde.class).objectField("nachname").indexed(false);
+		conf.common().objectClass(Kunde.class).objectField("vorname").indexed(indexed);
+		conf.common().objectClass(Kunde.class).objectField("nachname").indexed(indexed);
 		db.initDBConnection(conf);
 	
-		anfangszeit[0] = System.nanoTime();
+		anfangszeit[indexed ? 1 : 0] = System.nanoTime();
 		for (int i = 0; i < 1000; i++) {
 			Query query = db.query();
 			query.constrain(Kunde.class);
@@ -37,27 +37,7 @@ public class Fall1 {
 		}
 		db.closeDBConncetion();
 		
-		endzeit[0] = System.nanoTime();
-	}
-	
-	public void runIndexed() {
-		EmbeddedConfiguration conf = Db4oEmbedded.newConfiguration();
-		conf.common().objectClass(Kunde.class).objectField("vorname").indexed(true);
-		conf.common().objectClass(Kunde.class).objectField("nachname").indexed(true);
-		db.initDBConnection(conf);
-		System.out.println("Indizes kreiert");
-		
-		anfangszeit[1] = System.nanoTime();
-		for (int i = 0; i < 1000; i++) {
-			Query query = db.query();
-			query.constrain(Kunde.class);
-			query.descend("vorname").constrain(gesuchte[i % 1000].getVorname());
-			query.descend("nachname").constrain(gesuchte[i % 1000].getNachname());
-			ObjectSet set = query.execute();
-		}
-		db.closeDBConncetion();
-		
-		endzeit[1] = System.nanoTime();
+		endzeit[indexed ? 1 : 0] = System.nanoTime();
 	}
 	
 	public long getTime(int which) {
@@ -69,6 +49,4 @@ public class Fall1 {
 		return "Fall1 ohne Index: " + getTime(0) + " ms\n" +
 			   "Fall1  mit Index: " + getTime(1) + " ms";
 	}
-	
-	
 }

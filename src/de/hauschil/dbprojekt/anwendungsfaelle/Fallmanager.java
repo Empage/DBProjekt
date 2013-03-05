@@ -11,7 +11,7 @@ import de.hauschil.dbprojekt.model.Anruf;
 import de.hauschil.dbprojekt.model.Kunde;
 
 public class Fallmanager {
-	public static final int FAKTOR 		= 20;
+	public static final int FAKTOR 		= 5;
 	public static final int ANZ_KUNDEN 	= 100 * FAKTOR;
 	public static final int ANZ_PARTNER = FAKTOR;
 	public static final int ANZ_ANRUFPM	= 3 * FAKTOR;
@@ -23,8 +23,8 @@ public class Fallmanager {
 		setUpBeforeClass();
 		
 		Fall1 f1 = new Fall1(db);
-		f1.runIndexed();
-		f1.run();
+		f1.run(false);
+		f1.run(true);
 		
 		System.out.println(f1);
 	}
