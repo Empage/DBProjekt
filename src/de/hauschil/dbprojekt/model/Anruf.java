@@ -16,9 +16,9 @@ public class Anruf {
 	private Telefon anrufer;
 	private Telefon angerufener;
 	private int dauer;
-	private Date datum;
+	private long datum;
 	
-	public Anruf(Telefon anrufer, Telefon angerufener, Date datum, int dauer) {
+	public Anruf(Telefon anrufer, Telefon angerufener, long datum, int dauer) {
 		this.anrufer = anrufer;
 		this.angerufener = angerufener;
 		this.datum = datum;
@@ -43,10 +43,10 @@ public class Anruf {
 	public void setDauer(int dauer) {
 		this.dauer = dauer;
 	}
-	public Date getDatum() {
+	public long getDatum() {
 		return datum;
 	}
-	public void setDatum(Date datum) {
+	public void setDatum(long datum) {
 		this.datum = datum;
 	}
 	
@@ -97,13 +97,13 @@ public class Anruf {
 	}
 	
 	/* Ein random Datum aus 2012 generieren */
-	private static Date generateDate(int month) {
+	private static long generateDate(int month) {
 		GregorianCalendar cal = new GregorianCalendar(2012, month, 1);
 		cal.set(Calendar.DAY_OF_MONTH, r.nextInt(cal.getActualMaximum(Calendar.DAY_OF_MONTH)));
 		cal.set(Calendar.HOUR_OF_DAY, r.nextInt(24));
 		cal.set(Calendar.MINUTE, r.nextInt(60));
 		cal.set(Calendar.SECOND, r.nextInt(60));
 		
-		return cal.getTime();
+		return cal.getTimeInMillis();
 	}
 }

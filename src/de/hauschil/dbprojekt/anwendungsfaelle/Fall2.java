@@ -67,14 +67,18 @@ public class Fall2 {
 		return list;
 	}
 	
-	public ArrayList<Anruf> getAnrufeFromDb(Kunde k) {
-		Date date = new Date(2012, 11, 01);
+	public ArrayList<Anruf> getAnrufeFromDb(Kunde k, int month) {
+		GregorianCalendar cal1 = new GregorianCalendar();
+		cal1.set(2012, month, 1);
+		GregorianCalendar cal2 = new GregorianCalendar();
+		cal2.set(2012, month, cal1.getActualMaximum(Calendar.DAY_OF_MONTH));
 		ArrayList<Anruf> list = new ArrayList<>();
 		for (Telefon tel : k.getTelefone()) {
 			Query query = db.query();
 			query.constrain(Anruf.class);
 			Constraint constraint1 = query.descend("anrufer").constrain(tel);
-			query.descend("datum").constrain(date).or(constraint1);
+			Constraint constraint2 = query.descend("datum").constrain(cal1.getTimeInMillis()).greater();
+			query.descend("datum").constrain(cal2.getTimeInMillis()).smaller().and(constraint2).or(constraint1);
 			ObjectSet<Anruf> set = query.execute();
 			list.addAll(set);
 		}
@@ -84,11 +88,11 @@ public class Fall2 {
 	
 	private Long berechneKosten(Kunde k) {
 		long kosten = 0;
-		ArrayList<Anruf> anrufe = getAnrufeFromDb(k);
+		ArrayList<Anruf> anrufe = getAnrufeFromDb(k, 5);
 
 		for (Anruf a : anrufe) {
 			GregorianCalendar cal = new GregorianCalendar();
-			cal.setTime(a.getDatum());
+			cal.setTimeInMillis(a.getDatum());
 			if (
 				cal.get(Calendar.DAY_OF_WEEK) == Calendar.SATURDAY || 
 				cal.get(Calendar.DAY_OF_WEEK) == Calendar.SUNDAY
