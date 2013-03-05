@@ -15,7 +15,6 @@ public class Anruf {
 
 	private Telefon anrufer;
 	private Telefon angerufener;
-	
 	private int dauer;
 	private Date datum;
 	
@@ -25,11 +24,28 @@ public class Anruf {
 		this.datum = datum;
 		this.dauer = dauer;
 	}
-	
+		
+	public Telefon getAnrufer() {
+		return anrufer;
+	}
+	public void setAnrufer(Telefon anrufer) {
+		this.anrufer = anrufer;
+	}
+	public Telefon getAngerufener() {
+		return angerufener;
+	}
+	public void setAngerufener(Telefon angerufener) {
+		this.angerufener = angerufener;
+	}
+	public int getDauer() {
+		return dauer;
+	}
+	public void setDauer(int dauer) {
+		this.dauer = dauer;
+	}
 	public Date getDatum() {
 		return datum;
 	}
-
 	public void setDatum(Date datum) {
 		this.datum = datum;
 	}

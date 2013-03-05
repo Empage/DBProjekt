@@ -11,7 +11,7 @@ import de.hauschil.dbprojekt.model.Anruf;
 import de.hauschil.dbprojekt.model.Kunde;
 
 public class Fallmanager {
-	public static final int FAKTOR 		= 5;
+	public static final int FAKTOR 		= 1;
 	public static final int ANZ_KUNDEN 	= 100 * FAKTOR;
 	public static final int ANZ_PARTNER = FAKTOR;
 	public static final int ANZ_ANRUFPM	= 3 * FAKTOR;
@@ -23,10 +23,15 @@ public class Fallmanager {
 		setUpBeforeClass();
 		
 		Fall1 f1 = new Fall1(db);
-		f1.run(false);
-		f1.run(true);
+//		f1.run(false);
+//		f1.run(true);
+
+		Fall4 f4 = new Fall4(db);
+		f4.run(false);
+//		f4.run(true);
 		
 		System.out.println(f1);
+		System.out.println(f4);
 	}
 	
 	private static void setUpBeforeClass() throws IOException {
@@ -39,7 +44,8 @@ public class Fallmanager {
 		Kunde[] kunden = Kunde.generateKunden(ANZ_KUNDEN);
 		System.out.println(ANZ_KUNDEN + " Kunden generiert");
 		db.storeObject(kunden);
-//		Anruf.generateAnrufe(kunden, ANZ_ANRUFPM, db);
+		Anruf.generateAnrufe(kunden, ANZ_ANRUFPM, db);
+		
 		db.closeDBConncetion();
 	}
 	
