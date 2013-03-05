@@ -8,7 +8,7 @@ import java.util.Random;
 
 import de.hauschil.dbprojekt.controller.DB4O_Controller;
 import de.hauschil.dbprojekt.controller.DB_Controller;
-import static de.hauschil.dbprojekt.controller.Main.*;
+import static de.hauschil.dbprojekt.anwendungsfaelle.Fallmanager.*;
 
 public class Anruf {
 	private static Random r = new Random(42);
