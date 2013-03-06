@@ -25,12 +25,16 @@ public class Fallmanager {
 		Fall1 f1 = new Fall1(db);
 //		f1.run(false);
 //		f1.run(true);
+		
+		Fall2 f2 = new Fall2(db);
+		f2.run(false);
 
 		Fall4 f4 = new Fall4(db);
-		f4.run(false);
+//		f4.run(false);
 //		f4.run(true);
 		
 		System.out.println(f1);
+		System.out.println(f2);
 		System.out.println(f4);
 	}
 	

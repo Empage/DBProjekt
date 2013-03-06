@@ -2,9 +2,7 @@ package de.hauschil.dbprojekt.anwendungsfaelle;
 
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.GregorianCalendar;
-import java.util.Random;
 
 import com.db4o.Db4oEmbedded;
 import com.db4o.ObjectSet;
@@ -21,7 +19,6 @@ public class Fall2 {
 	private long[] anfangszeit;
 	private long[] endzeit;
 	private DB_Controller db;
-	private Kunde[] gesuchte;
 	
 	public Fall2(DB_Controller db) {
 		this.db = db;
@@ -39,12 +36,15 @@ public class Fall2 {
 		ArrayList<Long> kosten = new ArrayList<>(kunden.size());
 	
 		anfangszeit[indexed ? 1 : 0] = System.nanoTime();
+
 		for (int i = 0; i < kunden.size(); i++) {
-			kosten.set(i, berechneKosten(kunden.get(i)));
+			kosten.add(i, berechneKosten(kunden.get(i)));
 		}
-		
+
 		db.closeDBConncetion();
 		endzeit[indexed ? 1 : 0] = System.nanoTime();
+		
+		System.out.println(kosten);
 	}
 	
 	public long getTime(int which) {
@@ -53,8 +53,8 @@ public class Fall2 {
 
 	@Override
 	public String toString() {
-		return "Fall4 ohne Index: " + getTime(0) + " ms\n" +
-			   "Fall4  mit Index: " + getTime(1) + " ms";
+		return "Fall2 ohne Index: " + getTime(0) + " ms\n" +
+			   "Fall2  mit Index: " + getTime(1) + " ms";
 	}
 	
 	private ArrayList<Kunde> getAllKundenFromDb() {
@@ -69,16 +69,17 @@ public class Fall2 {
 	
 	public ArrayList<Anruf> getAnrufeFromDb(Kunde k, int month) {
 		GregorianCalendar cal1 = new GregorianCalendar();
-		cal1.set(2012, month, 1);
+		cal1.set(2012, month - 1, 1, 0, 0, 0);
 		GregorianCalendar cal2 = new GregorianCalendar();
-		cal2.set(2012, month, cal1.getActualMaximum(Calendar.DAY_OF_MONTH));
+		cal2.set(2012, month - 1, cal1.getActualMaximum(Calendar.DAY_OF_MONTH), 23, 59, 59);
 		ArrayList<Anruf> list = new ArrayList<>();
+		
 		for (Telefon tel : k.getTelefone()) {
 			Query query = db.query();
 			query.constrain(Anruf.class);
 			Constraint constraint1 = query.descend("anrufer").constrain(tel);
 			Constraint constraint2 = query.descend("datum").constrain(cal1.getTimeInMillis()).greater();
-			query.descend("datum").constrain(cal2.getTimeInMillis()).smaller().and(constraint2).or(constraint1);
+			query.descend("datum").constrain(cal2.getTimeInMillis()).smaller().and(constraint2).and(constraint1);
 			ObjectSet<Anruf> set = query.execute();
 			list.addAll(set);
 		}
@@ -89,7 +90,7 @@ public class Fall2 {
 	private Long berechneKosten(Kunde k) {
 		long kosten = 0;
 		ArrayList<Anruf> anrufe = getAnrufeFromDb(k, 5);
-
+		
 		for (Anruf a : anrufe) {
 			GregorianCalendar cal = new GregorianCalendar();
 			cal.setTimeInMillis(a.getDatum());
@@ -97,11 +98,9 @@ public class Fall2 {
 				cal.get(Calendar.DAY_OF_WEEK) == Calendar.SATURDAY || 
 				cal.get(Calendar.DAY_OF_WEEK) == Calendar.SUNDAY
 			) {
-				//XXX
-				System.out.println("we");
-				kosten += a.getDauer() * 9; /* cent */
+				kosten += a.getDauer() / 60 * 9; /* cent/min */
 			} else {
-				kosten += a.getDauer() * 19; /* cent */
+				kosten += a.getDauer() / 60 * 19; /* cent/min */
 			}
 		}
 		

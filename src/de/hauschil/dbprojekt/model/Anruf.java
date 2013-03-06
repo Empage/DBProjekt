@@ -79,7 +79,7 @@ public class Anruf {
 						kunden[i].getTelefone().get(next_telefon),
 						partner[next_partner].getTelefone().get(next_partner_telefon),
 						generateDate(month),
-						r.nextInt(3600)
+						r.nextInt(600)
 					);
 				}
 			}
