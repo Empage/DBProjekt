@@ -38,4 +38,10 @@ public class DB4O_Controller implements DB_Controller {
 	public Query query() {
 		return db.query();
 	}
+
+	@Override
+	public void delete(Object o) {
+		db.delete(o);
+		
+	}
 }

@@ -14,6 +14,7 @@ import de.hauschil.dbprojekt.model.Anruf;
 import de.hauschil.dbprojekt.model.Kunde;
 import de.hauschil.dbprojekt.model.Telefon;
 
+//TODO krieg ich nur die Telefonnummer oder auch schon den Namen des Kerls/kerlin
 public class Fall4 {
 	private long[] anfangszeit;
 	private long[] endzeit;
@@ -28,8 +29,8 @@ public class Fall4 {
 	
 	public void run(boolean indexed) {
 		EmbeddedConfiguration conf = Db4oEmbedded.newConfiguration();
-		conf.common().objectClass(Kunde.class).objectField("vorname").indexed(indexed);
-		conf.common().objectClass(Kunde.class).objectField("nachname").indexed(indexed);
+		conf.common().objectClass(Anruf.class).objectField("anrufer").indexed(indexed);
+		conf.common().objectClass(Anruf.class).objectField("angerufener").indexed(indexed);
 		db.initDBConnection(conf);
 		
 		Kunde[] kunden = getKundenFromDb(50);

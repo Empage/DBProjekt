@@ -28,8 +28,8 @@ public class Fall2 {
 	
 	public void run(boolean indexed) {
 		EmbeddedConfiguration conf = Db4oEmbedded.newConfiguration();
-		conf.common().objectClass(Kunde.class).objectField("vorname").indexed(indexed);
-		conf.common().objectClass(Kunde.class).objectField("nachname").indexed(indexed);
+		conf.common().objectClass(Anruf.class).objectField("anrufer").indexed(indexed);
+		conf.common().objectClass(Anruf.class).objectField("datum").indexed(indexed);
 		db.initDBConnection(conf);
 		
 		ArrayList<Kunde> kunden = getAllKundenFromDb();
@@ -43,8 +43,6 @@ public class Fall2 {
 
 		db.closeDBConncetion();
 		endzeit[indexed ? 1 : 0] = System.nanoTime();
-		
-		System.out.println(kosten);
 	}
 	
 	public long getTime(int which) {
@@ -69,9 +67,9 @@ public class Fall2 {
 	
 	public ArrayList<Anruf> getAnrufeFromDb(Kunde k, int month) {
 		GregorianCalendar cal1 = new GregorianCalendar();
-		cal1.set(2012, month - 1, 1, 0, 0, 0);
+		cal1.set(2012, month, 1, 0, 0, 0);
 		GregorianCalendar cal2 = new GregorianCalendar();
-		cal2.set(2012, month - 1, cal1.getActualMaximum(Calendar.DAY_OF_MONTH), 23, 59, 59);
+		cal2.set(2012, month, cal1.getActualMaximum(Calendar.DAY_OF_MONTH), 23, 59, 59);
 		ArrayList<Anruf> list = new ArrayList<>();
 		
 		for (Telefon tel : k.getTelefone()) {
@@ -87,9 +85,10 @@ public class Fall2 {
 		return list;
 	}
 	
+	//TODO evtl noch gleiche Vorwahl berücksichtigen im Preis
 	private Long berechneKosten(Kunde k) {
 		long kosten = 0;
-		ArrayList<Anruf> anrufe = getAnrufeFromDb(k, 5);
+		ArrayList<Anruf> anrufe = getAnrufeFromDb(k, Calendar.MAY);
 		
 		for (Anruf a : anrufe) {
 			GregorianCalendar cal = new GregorianCalendar();

@@ -8,5 +8,6 @@ public interface DB_Controller {
 	public void storeObject(Object o);
 	public void commit();
 	public Query query();
+	public void delete(Object o);
 	public void closeDBConncetion();
 }
