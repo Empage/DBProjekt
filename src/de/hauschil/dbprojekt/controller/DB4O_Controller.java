@@ -1,6 +1,6 @@
 package de.hauschil.dbprojekt.controller;
 
-import static de.hauschil.dbprojekt.anwendungsfaelle.Fallmanager.DB_PATH;
+import static de.hauschil.dbprojekt.anwendungsfaelle.Fallmanager.DB4O_PATH;
 
 import com.db4o.Db4oEmbedded;
 import com.db4o.ObjectContainer;
@@ -13,9 +13,9 @@ public class DB4O_Controller implements DB_Controller {
 	@Override
 	public void initDBConnection(EmbeddedConfiguration conf) {
 		if (conf == null) {
-			db = Db4oEmbedded.openFile(Db4oEmbedded.newConfiguration(), DB_PATH);
+			db = Db4oEmbedded.openFile(Db4oEmbedded.newConfiguration(), DB4O_PATH);
 		} else {
-			db = Db4oEmbedded.openFile(conf, DB_PATH);
+			db = Db4oEmbedded.openFile(conf, DB4O_PATH);
 		}
 	}
 

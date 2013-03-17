@@ -4,9 +4,11 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.sql.Statement;
 
 import de.hauschil.dbprojekt.controller.DB4O_Controller;
 import de.hauschil.dbprojekt.controller.DB_Controller;
+import de.hauschil.dbprojekt.controller.HSQL_Controller;
 import de.hauschil.dbprojekt.model.Anruf;
 import de.hauschil.dbprojekt.model.Kunde;
 
@@ -16,13 +18,18 @@ public class Fallmanager {
 	public static final int ANZ_PARTNER = FAKTOR;
 	public static final int ANZ_ANRUFPM	= 3 * FAKTOR;
 //	public static final String DB_PATH = "db/telefongesellschaft.db4o";
-	public static final String DB_PATH = "D:\\tmp\\db\\telefongesellschaft.db4o";
+	public static final String DB4O_PATH = "D:\\tmp\\db\\telefongesellschaft.db4o";
+	public static final String HSQL_PATH = "D:\\tmp\\db\\telefongesellschaft.hsql";
 	
 	private static DB_Controller db;
 	private static long db_size;
 	
 	public static void main(String... args) throws IOException {
-		setUpBeforeClass();
+		db = new HSQL_Controller();
+		db.initDBConnection(null);
+	
+		
+//		setUpBeforeClass();
 		
 //		Fall1 f1 = new Fall1(db);
 //		f1.run(true);
@@ -47,11 +54,11 @@ public class Fallmanager {
 //		f3.run(false);
 //		System.out.println(f3);
 		
-		System.out.println("DB size: " + db_size / 1024 + " kiB");
+//		System.out.println("DB size: " + db_size / 1024 + " kiB");
 	}
 	
 	private static void setUpBeforeClass() throws IOException {
-		Path dbPath = Paths.get(DB_PATH);
+		Path dbPath = Paths.get(DB4O_PATH);
 		Files.deleteIfExists(dbPath);
 		
 		db = new DB4O_Controller();
