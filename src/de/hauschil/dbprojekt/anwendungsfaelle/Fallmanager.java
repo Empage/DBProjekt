@@ -27,7 +27,9 @@ public class Fallmanager {
 	public static void main(String... args) throws IOException {
 		db = new HSQL_Controller();
 		db.initDBConnection(null);
-	
+		db.createTables();
+		db.dropTables();
+		db.closeDBConncetion();
 		
 //		setUpBeforeClass();
 		
@@ -57,7 +59,7 @@ public class Fallmanager {
 //		System.out.println("DB size: " + db_size / 1024 + " kiB");
 	}
 	
-	private static void setUpBeforeClass() throws IOException {
+	private static void setUpDb4o() throws IOException {
 		Path dbPath = Paths.get(DB4O_PATH);
 		Files.deleteIfExists(dbPath);
 		
@@ -74,6 +76,21 @@ public class Fallmanager {
 		db_size = Files.size(dbPath);
 	}
 	
-	private static void tearDownAfterClass() {
+	private static void setUpHSQL() throws IOException {
+		Path dbPath = Paths.get(HSQL_PATH);
+				
+		db = new DB4O_Controller();
+		db.initDBConnection(null);
+		db.dropTables();
+
+		//TODO ab hier weitermachen, Kunden müssen mit einheitlicher Methode gestored werden
+		Kunde[] kunden = Kunde.generateKunden(ANZ_KUNDEN);
+		System.out.println(ANZ_KUNDEN + " Kunden generiert");
+		db.storeObject(kunden);
+		Anruf.generateAnrufe(kunden, ANZ_ANRUFPM, db);
+		
+		db.closeDBConncetion();
+		
+		db_size = Files.size(dbPath);
 	}
 }

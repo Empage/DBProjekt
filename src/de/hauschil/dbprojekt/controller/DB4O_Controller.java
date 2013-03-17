@@ -44,4 +44,14 @@ public class DB4O_Controller implements DB_Controller {
 		db.delete(o);
 		
 	}
+
+	@Override
+	public void createTables() {
+		/* wird nicht benötigt für db4o */
+	}
+
+	@Override
+	public void dropTables() {
+		/* wird nicht benötigt für db4o */
+	}
 }
