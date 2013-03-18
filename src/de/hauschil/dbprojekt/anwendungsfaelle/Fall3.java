@@ -39,8 +39,6 @@ public class Fall3 {
 		cal1.set(2012, Calendar.JANUARY, 1, 0, 0, 0);
 		GregorianCalendar cal2 = new GregorianCalendar();
 		cal2.set(2012, cal1.get(Calendar.MONTH), cal1.getActualMaximum(Calendar.DAY_OF_MONTH), 23, 59, 59);
-		System.out.println(cal1.getTimeInMillis());
-		System.out.println(cal2.getTimeInMillis());
 		db.deleteAnrufe(cal1.getTimeInMillis(), cal2.getTimeInMillis());
 		
 		db.closeDBConncetion();

@@ -10,16 +10,17 @@ import com.db4o.query.Constraint;
 import com.db4o.query.Query;
 
 import de.hauschil.dbprojekt.controller.DB_Controller;
+import de.hauschil.dbprojekt.controller.Index;
 import de.hauschil.dbprojekt.model.Anruf;
 import de.hauschil.dbprojekt.model.Kunde;
 import de.hauschil.dbprojekt.model.Telefon;
 
-//TODO krieg ich nur die Telefonnummer oder auch schon den Namen des Kerls/kerlin
 public class Fall4 {
 	private long[] anfangszeit;
 	private long[] endzeit;
 	private DB_Controller db;
-	private Kunde[] gesuchte;
+	/* Kontakte, die ans Bundeskriminalamt übergeben werden können */
+	private ArrayList<Kunde> kontakte = new ArrayList<>();
 	
 	public Fall4(DB_Controller db) {
 		this.db = db;
@@ -28,18 +29,22 @@ public class Fall4 {
 	}
 	
 	public void run(boolean indexed) {
-		EmbeddedConfiguration conf = Db4oEmbedded.newConfiguration();
-		conf.common().objectClass(Anruf.class).objectField("anrufer").indexed(indexed);
-		conf.common().objectClass(Anruf.class).objectField("angerufener").indexed(indexed);
-		db.initDBConnection(conf);
+		db.initDBConnection(new Index[] {
+			new Index(Anruf.class, "anrufer", indexed), 
+			new Index(Anruf.class, "angerufener", indexed)
+		});
 		
-		Kunde[] kunden = getKundenFromDb(50);
+		Kunde[] kunden = getKundenFromDb(1);
 	
 		anfangszeit[indexed ? 1 : 0] = System.nanoTime();
 		for (Kunde k : kunden) {
-			getAnrufeFromDb(k);
+			for (Anruf a : getAnrufeFromDb(k)) {
+				Kunde kontakt = db.getKundeByNumber(a.getAngerufener().toString());
+				if (!kontakte.contains(kontakt)) {
+					kontakte.add(kontakt);
+				}
+			}
 		}
-		
 		db.closeDBConncetion();
 		endzeit[indexed ? 1 : 0] = System.nanoTime();
 	}
@@ -58,12 +63,10 @@ public class Fall4 {
 		Random r = new Random(1337);
 		Kunde[] k = new Kunde[count];
 		
-		Query query = db.query();
-		query.constrain(Kunde.class);
-		ObjectSet set = query.execute();
+		ArrayList<Kunde> list = db.getKunden(null, null);
 		
 		for (int i = 0; i < count; i++) {
-			k[i] = (Kunde) set.get(r.nextInt(set.size()));
+			k[i] = list.get(r.nextInt(list.size()));
 		}
 		
 		return k;
@@ -72,12 +75,7 @@ public class Fall4 {
 	public ArrayList<Anruf> getAnrufeFromDb(Kunde k) {
 		ArrayList<Anruf> list = new ArrayList<>();
 		for (Telefon tel : k.getTelefone()) {
-			Query query = db.query();
-			query.constrain(Anruf.class);
-			Constraint constraint1 = query.descend("anrufer").constrain(tel);
-			query.descend("angerufener").constrain(tel).or(constraint1);
-			ObjectSet set = query.execute();
-			list.addAll(set);
+			list.addAll(db.getAnrufe(tel, tel, null, null));
 		}
 		
 		return list;

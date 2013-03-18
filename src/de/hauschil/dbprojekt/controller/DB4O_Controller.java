@@ -106,6 +106,10 @@ public class DB4O_Controller implements DB_Controller {
 		} else if (anrufer == null && angerufener == null && d1 != null && d2 != null) {
 			Constraint constraint2 = query.descend("datum").constrain(d1.longValue()).greater();
 			query.descend("datum").constrain(d2.longValue()).smaller().and(constraint2);
+		/* Fall 4 */
+		} else if (anrufer != null && angerufener != null && d1 == null && d2 == null) { 
+			Constraint constraint1 = query.descend("anrufer").constrain(anrufer);
+			query.descend("angerufener").constrain(angerufener).or(constraint1);
 		} else {
 			throw new RuntimeException("TODO getAnrufe");
 		}
@@ -123,5 +127,24 @@ public class DB4O_Controller implements DB_Controller {
 		for (Anruf a : list) {
 			db.delete(a);
 		}
+	}
+
+	@Override
+	public Kunde getKundeByNumber(String number) {
+		Kunde k;
+		
+		Query query = db.query();
+		query.constrain(Kunde.class);
+		query.descend("telefone").descend("nummer").constrain(number);
+
+		ObjectSet<Kunde> set = query.execute();
+		k = set.get(0);
+		
+		return k;
+	}
+	
+	@Override
+	public String toString() {
+		return "db4o-Controller!";
 	}
 }

@@ -23,16 +23,91 @@ public class HSQL_Controller implements DB_Controller {
 	Connection c = null;
 	PreparedStatement psAnrufe = null;
 	
+	//TODO index nicht nur über einzelne Spalten sondern beide gleichzeit, wenn angegeben
 	@Override
 	public void initDBConnection(Index... indizes) {
-		//TODO indizes
 		try {
 			c = DriverManager.getConnection(
 				"jdbc:hsqldb:file:" + HSQL_PATH + "; shutdown=true",
 				"root", "cocacola"
 			);
+			try (Statement st = c.createStatement()) {
+				/* Spezielle Variante für diese Testcases */
+				if (indizes.length == 2) {
+					/* Fall1 */
+					if (indizes[0].getIndexClass().equals(Kunde.class)) {
+						if (indizes[0].getIndexField().equals("vorname") && indizes[1].getIndexField().equals("nachname")) {
+							createSingleIndex(st, indizes);
+							if (indizes[0].isIndexed()) {
+								st.execute("CREATE INDEX idx_name ON Kunde(vorname, nachname)");
+							} else {
+								st.execute("DROP INDEX idx_name IF EXISTS");
+							}
+						} else {
+							throw new RuntimeException("TODO");
+						}
+					} else if (indizes[0].getIndexClass().equals(Anruf.class)) {
+						/* Fall2 */
+						if (indizes[0].getIndexField().equals("anrufer") && indizes[1].getIndexField().equals("datum")) {
+							createSingleIndex(st, indizes);
+							if (indizes[0].isIndexed()) {
+								st.execute("CREATE INDEX idx_andat ON Anruf(id_anrufer, datum)");
+							} else {
+								st.execute("DROP INDEX idx_andat IF EXISTS");
+							}
+						/* Fall4 */
+						} else if (indizes[0].getIndexField().equals("anrufer") && indizes[1].getIndexField().equals("angerufener")) {
+							createSingleIndex(st, indizes);
+							if (indizes[0].isIndexed()) {
+								st.execute("CREATE INDEX idx_anan ON Anruf(id_anrufer, id_angerufener)");
+							} else {
+								st.execute("DROP INDEX idx_anan IF EXISTS");
+							}
+						} else {
+							throw new RuntimeException("TODO");
+						}
+					} else {
+						throw new RuntimeException("TODO");
+					}
+				} else {
+					/* Fall3 */
+					createSingleIndex(st, indizes);
+				}
+			}
 		} catch (SQLException e) {
 			e.printStackTrace();
+		}
+	}
+	
+	/* Allgemeine Methode für Einzelspalten-Index */
+	private void createSingleIndex(Statement st, Index... indizes) throws SQLException {
+		for (Index i : indizes) {
+			String sql_start = "";
+			String sql_table = "";
+			String sql_end = "";
+			
+			/* index == false? Dann lösche vorhandenen Index */
+			if (!i.isIndexed()) {
+				sql_start = "DROP INDEX idx_" + i.getIndexField() + " IF EXISTS";
+				st.execute(sql_start);
+			/* Ansonsten erstelle einen, abhängig von der Klasse und den Feldern */
+			} else {
+				sql_start = "CREATE INDEX idx_" + i.getIndexField() + " ON ";
+				sql_end = "(" + i.getIndexField() + ")";
+
+				if (i.getIndexClass().equals(Kunde.class)) {
+					sql_table = "Kunde";
+				} else if (i.getIndexClass().equals(Anruf.class)) {
+					sql_table = "Anruf";
+					if (i.getIndexField().equals("anrufer") || i.getIndexField().equals("angerufener")) {
+						sql_end = "(id_" + i.getIndexField() + ")";
+					}
+				} else {
+					throw new RuntimeException("TODO");
+				}
+				
+				st.execute(sql_start + sql_table + sql_end);
+			}
 		}
 	}
 	
@@ -48,12 +123,13 @@ public class HSQL_Controller implements DB_Controller {
 				")"
 			);
 			/* erzeuge Tabelle Telefon */
+			/* Foreign keys auskommentiert, weil sonst automatisch Indizes angelegt werden (eig ja gut, aber nicht für diese Aufgabe ;) ) */
 			stmt.execute(
 				"CREATE TABLE IF NOT EXISTS Telefon (" +
 				"id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY," +
 				"nummer varchar(15) NOT NULL," + 
 				"id_kunde INTEGER NOT NULL," +
-				"FOREIGN KEY (id_kunde) REFERENCES Kunde(id)" +
+//				"FOREIGN KEY (id_kunde) REFERENCES Kunde(id)" +
 				")"
 			);
 			/* erzeuge Tabelle Anruf */
@@ -64,8 +140,8 @@ public class HSQL_Controller implements DB_Controller {
 				"datum BIGINT NOT NULL," +
 				"id_anrufer INTEGER NOT NULL," +
 				"id_angerufener INTEGER NOT NULL," +
-				"FOREIGN KEY (id_anrufer) REFERENCES Telefon(id)," +
-				"FOREIGN KEY (id_angerufener) REFERENCES Telefon(id)" +
+//				"FOREIGN KEY (id_anrufer) REFERENCES Telefon(id)," +
+//				"FOREIGN KEY (id_angerufener) REFERENCES Telefon(id)" +
 				")"
 			);
 		} catch (SQLException e) {
@@ -136,6 +212,7 @@ public class HSQL_Controller implements DB_Controller {
 				rs.next();
 				psAnrufe.setInt(4, rs.getInt(1));
 				psAnrufe.addBatch();
+				rs.close();
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -225,7 +302,7 @@ public class HSQL_Controller implements DB_Controller {
 			while (rs.next()) {
 				k.add(new Kunde(rs.getString(2), rs.getString(3), getTelefoneWithKID(rs.getInt(1))));
 			}
-			
+			rs.close();
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -243,6 +320,7 @@ public class HSQL_Controller implements DB_Controller {
 			while (rs.next()) {
 				t.add(new Telefon(rs.getString(1)));
 			}
+			rs.close();
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -267,12 +345,22 @@ public class HSQL_Controller implements DB_Controller {
 					"AND a.datum > " + d1.longValue() +" " +
 					"AND a.datum < " + d2.longValue()
 				);
+			/* Fall4 */
+			} else if (anrufer != null && angerufener != null && d1 == null && d2 == null) {
+				rs = stmt.executeQuery(
+					"SELECT t1.nummer as Anrufer, t2.nummer as Angerufener, dauer, datum " +
+					"FROM Anruf a, Telefon t1, Telefon t2 " +
+					"WHERE ((a.id_anrufer = t1.id AND a.id_angerufener = t2.id) " +
+					"OR (a.id_anrufer = t2.id AND a.id_angerufener = t1.id))" +
+					"AND t1.nummer = '" + anrufer.toString() + "'"
+				);
 			} else {
 				throw new RuntimeException("TODO");
 			}
 			while (rs.next()) {
 				list.add(new Anruf(anrufer, new Telefon(rs.getString(2)), rs.getLong(4), rs.getInt(3)));
 			}
+			rs.close();
 		} catch (SQLException e) {
 			e.printStackTrace();
 			
@@ -290,5 +378,28 @@ public class HSQL_Controller implements DB_Controller {
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
+	}
+
+	@Override
+	public Kunde getKundeByNumber(String number) {
+		Kunde k = null;
+		try (Statement st = c.createStatement()) {
+			ResultSet rs = st.executeQuery(
+				"SELECT vorname, nachname FROM Kunde k, Telefon t " +
+				"WHERE k.id = t.id_kunde AND t.nummer = '" + number + "'"
+			);
+			rs.next();
+			k = new Kunde(rs.getString(1), rs.getString(2), null);
+			rs.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		
+		return k;
+	}
+	
+	@Override
+	public String toString() {
+		return "HSQL-Controller!";
 	}
 }

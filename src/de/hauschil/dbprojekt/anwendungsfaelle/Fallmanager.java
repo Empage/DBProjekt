@@ -5,6 +5,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 
@@ -15,53 +16,61 @@ import de.hauschil.dbprojekt.model.Anruf;
 import de.hauschil.dbprojekt.model.Kunde;
 
 public class Fallmanager {
-	public static final int FAKTOR 		= 2;
+	public static final int FAKTOR 		= 50;
 	public static final int ANZ_KUNDEN 	= 100 * FAKTOR;
 	public static final int ANZ_PARTNER = FAKTOR;
 	public static final int ANZ_ANRUFPM	= 3 * FAKTOR;
 	public static final String DB4O_PATH = "D:\\tmp\\db\\telefongesellschaft.db4o";
 	public static final String HSQL_PATH = "D:\\tmp\\db\\telefongesellschaft.hsql";
 	
-	private static DB_Controller db;
+	private static ArrayList<DB_Controller> dbs = new ArrayList<>();
 	private static long db_size;
 	
 	public static void main(String... args) throws IOException {
-		db = new HSQL_Controller();
-//		db = new DB4O_Controller();
-		setUp();
+		dbs.add(new DB4O_Controller());
+		dbs.add(new HSQL_Controller());		
 		
-//		Fall1 f1 = new Fall1(db);
-//		f1.run(true);
-//		f1.run(false);
-//		System.out.println(f1);
-		
-//		Fall2 f2 = new Fall2(db);
-//		f2.run(true);
-//		/* Benötigt bei Faktor 10 schon über eine halbe Stunde */
-//		f2.run(false);
-//		System.out.println(f2);
-		
-//		Fall4 f4 = new Fall4(db);
-//		f4.run(true);
-//		f4.run(false);
-//		System.out.println(f4);
-		
-		/* Fall3 als letztes, weil er Sachen löscht, deshalb muss auch neu generiert werden */
-		Fall3 f3 = new Fall3(db);
-//		f3.run(true);
-//		setUpBeforeClass();
-		f3.run(false);
-		System.out.println(f3);
-		
-//		System.out.println("DB size: " + db_size / 1024 + " kiB");
+		for (DB_Controller db : dbs) {
+			System.out.println(db);
+			setUp(db);
+			
+			Fall1 f1 = new Fall1(db);
+			f1.run(true);
+			f1.run(false);
+			System.out.println(f1);
+			
+			Fall2 f2 = new Fall2(db);
+			f2.run(true);
+			/* Benötigt bei Faktor 10 schon über eine halbe Stunde */
+			f2.run(false);
+			System.out.println(f2);
+			
+			Fall4 f4 = new Fall4(db);
+			f4.run(true);
+			f4.run(false);
+			System.out.println(f4);
+			
+			/* Fall3 als letztes, weil er Sachen löscht, deshalb muss auch neu generiert werden */
+			Fall3 f3 = new Fall3(db);
+			f3.run(true);
+			setUp(db);
+			f3.run(false);
+			System.out.println(f3);
+			
+			System.out.println("DB size: " + db_size / 1024 + " kiB");
+		}
 	}
 	
-	private static void setUp() throws IOException {
+	private static void setUp(DB_Controller db) throws IOException {
 		Path dbPath = null;
 		
 		if (db instanceof DB4O_Controller) {
 			dbPath = Paths.get(DB4O_PATH);
 			Files.deleteIfExists(dbPath);
+		} else if (db instanceof HSQL_Controller) {
+			dbPath = Paths.get(HSQL_PATH + ".script");
+		} else {
+			throw new RuntimeException("TODO");
 		}
 		
 		db.initDBConnection();
@@ -77,9 +86,6 @@ public class Fallmanager {
 		Anruf.generateAnrufe(kunden, ANZ_ANRUFPM, db);
 		
 		db.closeDBConncetion();
-		
-		if (db instanceof DB4O_Controller) {
-			db_size = Files.size(dbPath);
-		}
+		db_size = Files.size(dbPath);
 	}
 }

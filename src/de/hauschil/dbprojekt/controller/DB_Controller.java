@@ -25,4 +25,5 @@ public interface DB_Controller {
 	public ArrayList<Kunde> getKunden(String vorname, String nachname);
 	public ArrayList<Anruf> getAnrufe(Telefon anrufer, Telefon angerufener, Long datum1, Long datum2);
 	public void deleteAnrufe(long datum1, long datum2);
+	public Kunde getKundeByNumber(String number);
 }
