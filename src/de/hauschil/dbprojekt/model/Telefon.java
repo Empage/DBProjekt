@@ -17,7 +17,7 @@ public class Telefon {
 		
 	@Override
 	public String toString() {
-		return "" + nummer;
+		return nummer;
 	}
 	
 	public static ArrayList<Telefon> generateTelefon(int count) {

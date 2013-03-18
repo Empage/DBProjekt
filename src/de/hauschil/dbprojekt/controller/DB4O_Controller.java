@@ -7,6 +7,9 @@ import com.db4o.ObjectContainer;
 import com.db4o.config.EmbeddedConfiguration;
 import com.db4o.query.Query;
 
+import de.hauschil.dbprojekt.model.Anruf;
+import de.hauschil.dbprojekt.model.Kunde;
+
 public class DB4O_Controller implements DB_Controller {
 	private static ObjectContainer db;
 	
@@ -52,6 +55,21 @@ public class DB4O_Controller implements DB_Controller {
 
 	@Override
 	public void dropTables() {
+		/* wird nicht benötigt für db4o */
+	}
+
+	@Override
+	public void storeKunden(Kunde[] k) {
+		db.store(k);
+	}
+
+	@Override
+	public void storeAnrufe(Anruf[] a) {
+		db.store(a);
+	}
+
+	@Override
+	public void closePStatement() {
 		/* wird nicht benötigt für db4o */
 	}
 }

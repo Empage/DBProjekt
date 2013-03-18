@@ -13,11 +13,10 @@ import de.hauschil.dbprojekt.model.Anruf;
 import de.hauschil.dbprojekt.model.Kunde;
 
 public class Fallmanager {
-	public static final int FAKTOR 		= 10;
+	public static final int FAKTOR 		= 1;
 	public static final int ANZ_KUNDEN 	= 100 * FAKTOR;
 	public static final int ANZ_PARTNER = FAKTOR;
 	public static final int ANZ_ANRUFPM	= 3 * FAKTOR;
-//	public static final String DB_PATH = "db/telefongesellschaft.db4o";
 	public static final String DB4O_PATH = "D:\\tmp\\db\\telefongesellschaft.db4o";
 	public static final String HSQL_PATH = "D:\\tmp\\db\\telefongesellschaft.hsql";
 	
@@ -26,12 +25,9 @@ public class Fallmanager {
 	
 	public static void main(String... args) throws IOException {
 		db = new HSQL_Controller();
-		db.initDBConnection(null);
-		db.createTables();
-		db.dropTables();
-		db.closeDBConncetion();
-		
-//		setUpBeforeClass();
+		setUp();
+//		db = new DB4O_Controller();
+//		setUp();
 		
 //		Fall1 f1 = new Fall1(db);
 //		f1.run(true);
@@ -59,38 +55,30 @@ public class Fallmanager {
 //		System.out.println("DB size: " + db_size / 1024 + " kiB");
 	}
 	
-	private static void setUpDb4o() throws IOException {
-		Path dbPath = Paths.get(DB4O_PATH);
-		Files.deleteIfExists(dbPath);
+	private static void setUp() throws IOException {
+		Path dbPath = null;
 		
-		db = new DB4O_Controller();
+		if (db instanceof DB4O_Controller) {
+			dbPath = Paths.get(DB4O_PATH);
+			Files.deleteIfExists(dbPath);
+		}
+		
 		db.initDBConnection(null);
+		
+		if (db instanceof HSQL_Controller) {
+			db.dropTables();
+			db.createTables();
+		}
 		
 		Kunde[] kunden = Kunde.generateKunden(ANZ_KUNDEN);
 		System.out.println(ANZ_KUNDEN + " Kunden generiert");
-		db.storeObject(kunden);
+		db.storeKunden(kunden);
 		Anruf.generateAnrufe(kunden, ANZ_ANRUFPM, db);
 		
 		db.closeDBConncetion();
 		
-		db_size = Files.size(dbPath);
-	}
-	
-	private static void setUpHSQL() throws IOException {
-		Path dbPath = Paths.get(HSQL_PATH);
-				
-		db = new DB4O_Controller();
-		db.initDBConnection(null);
-		db.dropTables();
-
-		//TODO ab hier weitermachen, Kunden müssen mit einheitlicher Methode gestored werden
-		Kunde[] kunden = Kunde.generateKunden(ANZ_KUNDEN);
-		System.out.println(ANZ_KUNDEN + " Kunden generiert");
-		db.storeObject(kunden);
-		Anruf.generateAnrufe(kunden, ANZ_ANRUFPM, db);
-		
-		db.closeDBConncetion();
-		
-		db_size = Files.size(dbPath);
+		if (db instanceof DB4O_Controller) {
+			db_size = Files.size(dbPath);
+		}
 	}
 }

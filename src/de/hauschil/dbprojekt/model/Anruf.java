@@ -83,7 +83,7 @@ public class Anruf {
 					);
 				}
 			}
-			db.storeObject(an);
+			db.storeAnrufe(an);
 			if (i % 100 == 99) {
 				db.commit();
 			}
@@ -92,6 +92,7 @@ public class Anruf {
 				System.out.print("+");
 			}
 		}
+		db.closePStatement();
 		System.out.println();
 		System.out.println(anzahlProMonat * 12 * ANZ_KUNDEN + " Anrufe generiert");
 	}

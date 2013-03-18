@@ -2,17 +2,24 @@ package de.hauschil.dbprojekt.controller;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Timestamp;
 
 import static de.hauschil.dbprojekt.anwendungsfaelle.Fallmanager.*;
 
 import com.db4o.config.EmbeddedConfiguration;
 import com.db4o.query.Query;
 
+import de.hauschil.dbprojekt.model.Anruf;
+import de.hauschil.dbprojekt.model.Kunde;
+import de.hauschil.dbprojekt.model.Telefon;
+
 public class HSQL_Controller implements DB_Controller {
 	Connection c = null;
+	PreparedStatement psAnrufe = null;
 	
 	@Override
 	public void initDBConnection(EmbeddedConfiguration conf) {
@@ -88,15 +95,90 @@ public class HSQL_Controller implements DB_Controller {
 			e.printStackTrace();
 		}
 	}
-
+	
 	@Override
-	public void storeObject(Object o) {
-		// TODO Auto-generated method stub
-		
+	public void storeKunden(Kunde[] kunden) {
+		try (PreparedStatement ps = c.prepareStatement(
+			"INSERT INTO Kunde (vorname, nachname) VALUES (?, ?)"
+		)) {
+			for (Kunde k : kunden) {
+				ps.setString(1, k.getVorname());
+				ps.setString(2, k.getNachname());
+				ps.execute();
+				
+				try (PreparedStatement ps2 = c.prepareStatement(
+					"INSERT INTO Telefon (nummer, id_kunde)" +
+					"VALUES (?, (SELECT TOP 1 id FROM Kunde ORDER BY id DESC))"
+				)) {
+					for (Telefon t : k.getTelefone()) {
+						ps2.setString(1, t.toString());
+						ps2.addBatch();
+					}
+					ps2.executeBatch();
+				}
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	@Override
+	public void storeAnrufe(Anruf[] anrufe) {
+		if (psAnrufe == null) {
+			try {
+				psAnrufe = c.prepareStatement(
+					"INSERT INTO Anruf (dauer, datum, id_anrufer, id_angerufener)" +
+					"VALUES (?, ?, ?, ?)"
+				);
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+		try {
+			for (Anruf a : anrufe) {
+				psAnrufe.setInt(1, a.getDauer());
+				psAnrufe.setTimestamp(2, new Timestamp(a.getDatum()));
+				Statement stmt = c.createStatement();
+				ResultSet rs = stmt.executeQuery("SELECT id FROM Telefon WHERE nummer = '" + a.getAnrufer().toString() + "'");
+				rs.next();
+				psAnrufe.setInt(3, rs.getInt(1));
+				
+				rs = stmt.executeQuery("SELECT id FROM Telefon WHERE nummer = '" + a.getAngerufener().toString() + "'");
+				rs.next();
+				psAnrufe.setInt(4, rs.getInt(1));
+				psAnrufe.addBatch();
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
 	}
 
 	@Override
 	public void commit() {
+		if (psAnrufe != null) {
+			try {
+				psAnrufe.executeBatch();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+	
+	@Override
+	public void closePStatement() {
+		if (psAnrufe != null) {
+			try {
+				psAnrufe.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			} finally {
+				psAnrufe = null;
+			}
+		}
+	}
+	
+	@Override
+	public void storeObject(Object o) {
 		// TODO Auto-generated method stub
 		
 	}
