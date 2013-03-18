@@ -35,23 +35,23 @@ public class Fallmanager {
 //		f1.run(false);
 //		System.out.println(f1);
 		
-		Fall2 f2 = new Fall2(db);
+//		Fall2 f2 = new Fall2(db);
 //		f2.run(true);
 //		/* Benötigt bei Faktor 10 schon über eine halbe Stunde */
-		f2.run(false);
-		System.out.println(f2);
+//		f2.run(false);
+//		System.out.println(f2);
 		
 //		Fall4 f4 = new Fall4(db);
 //		f4.run(true);
 //		f4.run(false);
 //		System.out.println(f4);
 		
-//		/* Fall3 als letztes, weil er Sachen löscht, deshalb muss auch neu generiert werden */
-//		Fall3 f3 = new Fall3(db);
+		/* Fall3 als letztes, weil er Sachen löscht, deshalb muss auch neu generiert werden */
+		Fall3 f3 = new Fall3(db);
 //		f3.run(true);
 //		setUpBeforeClass();
-//		f3.run(false);
-//		System.out.println(f3);
+		f3.run(false);
+		System.out.println(f3);
 		
 //		System.out.println("DB size: " + db_size / 1024 + " kiB");
 	}

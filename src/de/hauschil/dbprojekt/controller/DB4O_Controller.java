@@ -48,12 +48,6 @@ public class DB4O_Controller implements DB_Controller {
 	}
 
 	@Override
-	public void delete(Object o) {
-		db.delete(o);
-		
-	}
-
-	@Override
 	public void createTables() {
 		/* wird nicht benötigt für db4o */
 	}
@@ -108,6 +102,10 @@ public class DB4O_Controller implements DB_Controller {
 			Constraint constraint1 = query.descend("anrufer").constrain(anrufer);
 			Constraint constraint2 = query.descend("datum").constrain(d1.longValue()).greater();
 			query.descend("datum").constrain(d2.longValue()).smaller().and(constraint2).and(constraint1);
+		/* Fall3 */
+		} else if (anrufer == null && angerufener == null && d1 != null && d2 != null) {
+			Constraint constraint2 = query.descend("datum").constrain(d1.longValue()).greater();
+			query.descend("datum").constrain(d2.longValue()).smaller().and(constraint2);
 		} else {
 			throw new RuntimeException("TODO getAnrufe");
 		}
@@ -116,5 +114,14 @@ public class DB4O_Controller implements DB_Controller {
 		list.addAll(set);
 
 		return list;
+	}
+
+	@Override
+	public void deleteAnrufe(long datum1, long datum2) {
+		ArrayList<Anruf> list = getAnrufe(null, null, datum1, datum2);
+	
+		for (Anruf a : list) {
+			db.delete(a);
+		}
 	}
 }

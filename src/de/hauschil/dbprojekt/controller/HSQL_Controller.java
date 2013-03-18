@@ -179,12 +179,6 @@ public class HSQL_Controller implements DB_Controller {
 	}
 
 	@Override
-	public void delete(Object o) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
 	public void closeDBConncetion() {
 		if (c == null) {
 			return;
@@ -285,5 +279,16 @@ public class HSQL_Controller implements DB_Controller {
 		}
 		
 		return list;
+	}
+
+	@Override
+	public void deleteAnrufe(long datum1, long datum2) {
+		try (Statement stmt = c.createStatement()) {
+			stmt.execute(
+				"DELETE FROM Anruf WHERE datum > " + datum1 + " AND datum < " + datum2
+			);
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
 	}
 }
