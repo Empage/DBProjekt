@@ -15,6 +15,7 @@ import de.hauschil.dbprojekt.model.Anruf;
 import de.hauschil.dbprojekt.model.Kunde;
 import de.hauschil.dbprojekt.model.Telefon;
 
+// TODO getrennte Listen für ein- und ausgehende Kontakte
 public class Fall4 {
 	private long[] anfangszeit;
 	private long[] endzeit;
