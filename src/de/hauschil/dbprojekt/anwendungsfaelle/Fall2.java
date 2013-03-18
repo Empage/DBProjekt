@@ -11,6 +11,7 @@ import com.db4o.query.Constraint;
 import com.db4o.query.Query;
 
 import de.hauschil.dbprojekt.controller.DB_Controller;
+import de.hauschil.dbprojekt.controller.Index;
 import de.hauschil.dbprojekt.model.Anruf;
 import de.hauschil.dbprojekt.model.Kunde;
 import de.hauschil.dbprojekt.model.Telefon;
@@ -27,12 +28,12 @@ public class Fall2 {
 	}
 	
 	public void run(boolean indexed) {
-		EmbeddedConfiguration conf = Db4oEmbedded.newConfiguration();
-		conf.common().objectClass(Anruf.class).objectField("anrufer").indexed(indexed);
-		conf.common().objectClass(Anruf.class).objectField("datum").indexed(indexed);
-		db.initDBConnection(conf);
-		
-		ArrayList<Kunde> kunden = getAllKundenFromDb();
+		db.initDBConnection(new Index[] {
+			new Index(Anruf.class, "anrufer", indexed), 
+			new Index(Anruf.class, "datum", indexed)
+		});
+		/* null, null um keine Constraints zu haben und damit ALLE Kunden zu bekommen */
+		ArrayList<Kunde> kunden = db.getKunden(null, null);
 		ArrayList<Long> kosten = new ArrayList<>(kunden.size());
 	
 		anfangszeit[indexed ? 1 : 0] = System.nanoTime();
@@ -55,16 +56,6 @@ public class Fall2 {
 			   "Fall2  mit Index: " + getTime(1) + " ms";
 	}
 	
-	private ArrayList<Kunde> getAllKundenFromDb() {
-		ArrayList<Kunde> list = new ArrayList<>();
-		Query query = db.query();
-		query.constrain(Kunde.class);
-		ObjectSet<Kunde> set = query.execute();
-		list.addAll(set);
-		
-		return list;
-	}
-	
 	public ArrayList<Anruf> getAnrufeFromDb(Kunde k, int month) {
 		GregorianCalendar cal1 = new GregorianCalendar();
 		cal1.set(2012, month, 1, 0, 0, 0);
@@ -73,19 +64,12 @@ public class Fall2 {
 		ArrayList<Anruf> list = new ArrayList<>();
 		
 		for (Telefon tel : k.getTelefone()) {
-			Query query = db.query();
-			query.constrain(Anruf.class);
-			Constraint constraint1 = query.descend("anrufer").constrain(tel);
-			Constraint constraint2 = query.descend("datum").constrain(cal1.getTimeInMillis()).greater();
-			query.descend("datum").constrain(cal2.getTimeInMillis()).smaller().and(constraint2).and(constraint1);
-			ObjectSet<Anruf> set = query.execute();
-			list.addAll(set);
+			list.addAll(db.getAnrufe(tel, null, cal1.getTimeInMillis(), cal2.getTimeInMillis()));
 		}
 		
 		return list;
 	}
 	
-	//TODO evtl noch gleiche Vorwahl berücksichtigen im Preis
 	private Long berechneKosten(Kunde k) {
 		long kosten = 0;
 		ArrayList<Anruf> anrufe = getAnrufeFromDb(k, Calendar.MAY);
@@ -93,16 +77,31 @@ public class Fall2 {
 		for (Anruf a : anrufe) {
 			GregorianCalendar cal = new GregorianCalendar();
 			cal.setTimeInMillis(a.getDatum());
+			/* Am Wochenende ist Telefonieren günstiger */
 			if (
 				cal.get(Calendar.DAY_OF_WEEK) == Calendar.SATURDAY || 
 				cal.get(Calendar.DAY_OF_WEEK) == Calendar.SUNDAY
 			) {
-				kosten += a.getDauer() / 60 * 9; /* cent/min */
+				/* Wenn beide die gleiche Vorwahl haben, gibts auch Rabatt */
+				if (getVorwahl(a.getAnrufer()).equals(getVorwahl(a.getAngerufener()))) {
+					kosten += a.getDauer() / 60 * 4; /* cent/min */
+				} else {
+					kosten += a.getDauer() / 60 * 9; /* cent/min */
+				}
 			} else {
-				kosten += a.getDauer() / 60 * 19; /* cent/min */
+				/* Wenn beide die gleiche Vorwahl haben, gibts auch Rabatt */
+				if (getVorwahl(a.getAnrufer()).equals(getVorwahl(a.getAngerufener()))) {
+					kosten += a.getDauer() / 60 * 10; /* cent/min */
+				} else {
+					kosten += a.getDauer() / 60 * 19; /* cent/min */
+				}
 			}
 		}
 		
 		return kosten;
+	}
+	
+	private static String getVorwahl(Telefon t) {
+		return t.toString().split("/")[0];
 	}
 }

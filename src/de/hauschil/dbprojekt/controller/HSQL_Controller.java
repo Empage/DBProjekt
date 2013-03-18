@@ -7,10 +7,12 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 
 import static de.hauschil.dbprojekt.anwendungsfaelle.Fallmanager.*;
 
 import com.db4o.config.EmbeddedConfiguration;
+import com.db4o.query.Constraint;
 import com.db4o.query.Query;
 
 import de.hauschil.dbprojekt.model.Anruf;
@@ -22,7 +24,8 @@ public class HSQL_Controller implements DB_Controller {
 	PreparedStatement psAnrufe = null;
 	
 	@Override
-	public void initDBConnection(EmbeddedConfiguration conf) {
+	public void initDBConnection(Index... indizes) {
+		//TODO indizes
 		try {
 			c = DriverManager.getConnection(
 				"jdbc:hsqldb:file:" + HSQL_PATH + "; shutdown=true",
@@ -31,20 +34,6 @@ public class HSQL_Controller implements DB_Controller {
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-		
-//		try (
-//			Statement stmt = c.createStatement();
-//			ResultSet rs = stmt.executeQuery("SELECT * FROM Customer")	
-//		) {
-//			while (rs.next()) {
-//				String id = rs.getString(1);
-//				String firstName = rs.getString(2);
-//				String lastName = rs.getString(3);
-//				System.out.println(id + ", " + firstName + " " + lastName);
-//			}
-//		} catch (SQLException e) {
-//			e.printStackTrace();
-//		}
 	}
 	
 	@Override
@@ -72,7 +61,7 @@ public class HSQL_Controller implements DB_Controller {
 				"CREATE TABLE IF NOT EXISTS Anruf (" +
 				"id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY," +
 				"dauer INTEGER NOT NULL," +
-				"datum timestamp NOT NULL," +
+				"datum BIGINT NOT NULL," +
 				"id_anrufer INTEGER NOT NULL," +
 				"id_angerufener INTEGER NOT NULL," +
 				"FOREIGN KEY (id_anrufer) REFERENCES Telefon(id)," +
@@ -137,7 +126,7 @@ public class HSQL_Controller implements DB_Controller {
 		try {
 			for (Anruf a : anrufe) {
 				psAnrufe.setInt(1, a.getDauer());
-				psAnrufe.setTimestamp(2, new Timestamp(a.getDatum()));
+				psAnrufe.setLong(2, a.getDatum());
 				Statement stmt = c.createStatement();
 				ResultSet rs = stmt.executeQuery("SELECT id FROM Telefon WHERE nummer = '" + a.getAnrufer().toString() + "'");
 				rs.next();
@@ -206,5 +195,95 @@ public class HSQL_Controller implements DB_Controller {
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
+	}
+
+	@Override
+	public ArrayList<Kunde> getKunden(String vorname, String nachname) {
+		ArrayList<Kunde> k = new ArrayList<Kunde>();
+		try (Statement st = c.createStatement()) {
+			ResultSet rs;
+			if (vorname != null && nachname != null) {
+				rs = st.executeQuery(
+					"SELECT id, vorname, nachname FROM Kunde " +
+					"WHERE vorname = '" + vorname + "' AND nachname = '" + nachname + "' " +
+					"ORDER BY nachname ASC, vorname ASC"
+				);
+			} else if (vorname != null) {
+				rs = st.executeQuery(
+					"SELECT id, vorname, nachname FROM Kunde " +
+					"WHERE vorname = '" + vorname + "'" +
+					"ORDER BY nachname ASC, vorname ASC"
+				);
+			} else if (nachname != null) {
+				rs = st.executeQuery(
+					"SELECT id, vorname, nachname FROM Kunde " +
+					"WHERE nachname = '" + nachname + "' " +
+					"ORDER BY nachname ASC, vorname ASC"
+				);
+			/* beides null */
+			} else {
+				rs = st.executeQuery(
+					"SELECT id, vorname, nachname FROM Kunde " +
+					"ORDER BY nachname ASC, vorname ASC"
+				);
+			}
+			
+			while (rs.next()) {
+				k.add(new Kunde(rs.getString(2), rs.getString(3), getTelefoneWithKID(rs.getInt(1))));
+			}
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		
+		return k;
+	}
+	
+	private ArrayList<Telefon> getTelefoneWithKID(int k_id) {
+		ArrayList<Telefon> t = new ArrayList<>();
+		
+		try (Statement st = c.createStatement()) {
+			ResultSet rs = st.executeQuery(
+				"SELECT nummer FROM Telefon WHERE id_kunde = '" + k_id + "'"
+			);
+			while (rs.next()) {
+				t.add(new Telefon(rs.getString(1)));
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		
+		return t;
+	}
+	
+	/* d1 untere Grenze, d2 obere Grenze */
+	@Override
+	public ArrayList<Anruf> getAnrufe(Telefon anrufer, Telefon angerufener, Long d1, Long d2) {
+		ArrayList<Anruf> list = new ArrayList<>();
+		
+		/* Fall2 */
+		try (Statement stmt = c.createStatement()) {
+			ResultSet rs = null;
+			if (anrufer != null && angerufener == null && d1 != null && d2 != null) {
+				rs = stmt.executeQuery(
+					"SELECT t1.nummer as Anrufer, t2.nummer as Angerufener, dauer, datum " +
+					"FROM Anruf a, Telefon t1, Telefon t2 " +
+					"WHERE a.id_anrufer = t1.id AND a.id_angerufener = t2.id " +
+					"AND t1.nummer = '" + anrufer.toString() + "' " +
+					"AND a.datum > " + d1.longValue() +" " +
+					"AND a.datum < " + d2.longValue()
+				);
+			} else {
+				throw new RuntimeException("TODO");
+			}
+			while (rs.next()) {
+				list.add(new Anruf(anrufer, new Telefon(rs.getString(2)), rs.getLong(4), rs.getInt(3)));
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+			
+		}
+		
+		return list;
 	}
 }

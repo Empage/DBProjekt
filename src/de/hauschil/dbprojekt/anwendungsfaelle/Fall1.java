@@ -1,11 +1,7 @@
 package de.hauschil.dbprojekt.anwendungsfaelle;
 
-import com.db4o.Db4oEmbedded;
-import com.db4o.ObjectSet;
-import com.db4o.config.EmbeddedConfiguration;
-import com.db4o.query.Query;
-
 import de.hauschil.dbprojekt.controller.DB_Controller;
+import de.hauschil.dbprojekt.controller.Index;
 import de.hauschil.dbprojekt.model.Kunde;
 
 //XXX Fall1 done
@@ -23,18 +19,15 @@ public class Fall1 {
 	}
 	
 	public void run(boolean indexed) {
-		EmbeddedConfiguration conf = Db4oEmbedded.newConfiguration();
-		conf.common().objectClass(Kunde.class).objectField("vorname").indexed(indexed);
-		conf.common().objectClass(Kunde.class).objectField("nachname").indexed(indexed);
-		db.initDBConnection(conf);
+		db.initDBConnection(new Index[] {
+			new Index(Kunde.class, "vorname", indexed), 
+			new Index(Kunde.class, "nachname", indexed)
+		});
 	
 		anfangszeit[indexed ? 1 : 0] = System.nanoTime();
 		for (int i = 0; i < 1000; i++) {
-			Query query = db.query();
-			query.constrain(Kunde.class);
-			query.descend("vorname").constrain(gesuchte[i % 1000].getVorname());
-			query.descend("nachname").constrain(gesuchte[i % 1000].getNachname());
-			ObjectSet set = query.execute();
+			/* liefert gesuchte Kunden zurück */
+			db.getKunden(gesuchte[i % 1000].getVorname(), gesuchte[i % 1000].getNachname());
 		}
 		db.closeDBConncetion();
 		

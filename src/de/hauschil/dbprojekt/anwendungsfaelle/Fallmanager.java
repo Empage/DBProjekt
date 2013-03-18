@@ -5,6 +5,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.sql.Statement;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
 
 import de.hauschil.dbprojekt.controller.DB4O_Controller;
 import de.hauschil.dbprojekt.controller.DB_Controller;
@@ -13,7 +15,7 @@ import de.hauschil.dbprojekt.model.Anruf;
 import de.hauschil.dbprojekt.model.Kunde;
 
 public class Fallmanager {
-	public static final int FAKTOR 		= 1;
+	public static final int FAKTOR 		= 2;
 	public static final int ANZ_KUNDEN 	= 100 * FAKTOR;
 	public static final int ANZ_PARTNER = FAKTOR;
 	public static final int ANZ_ANRUFPM	= 3 * FAKTOR;
@@ -25,20 +27,19 @@ public class Fallmanager {
 	
 	public static void main(String... args) throws IOException {
 		db = new HSQL_Controller();
-		setUp();
 //		db = new DB4O_Controller();
-//		setUp();
+		setUp();
 		
 //		Fall1 f1 = new Fall1(db);
 //		f1.run(true);
 //		f1.run(false);
 //		System.out.println(f1);
 		
-//		Fall2 f2 = new Fall2(db);
+		Fall2 f2 = new Fall2(db);
 //		f2.run(true);
 //		/* Benötigt bei Faktor 10 schon über eine halbe Stunde */
-//		f2.run(false);
-//		System.out.println(f2);
+		f2.run(false);
+		System.out.println(f2);
 		
 //		Fall4 f4 = new Fall4(db);
 //		f4.run(true);
@@ -63,7 +64,7 @@ public class Fallmanager {
 			Files.deleteIfExists(dbPath);
 		}
 		
-		db.initDBConnection(null);
+		db.initDBConnection();
 		
 		if (db instanceof HSQL_Controller) {
 			db.dropTables();
