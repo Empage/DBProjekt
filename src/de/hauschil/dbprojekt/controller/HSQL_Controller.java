@@ -23,7 +23,6 @@ public class HSQL_Controller implements DB_Controller {
 	Connection c = null;
 	PreparedStatement psAnrufe = null;
 	
-	//TODO index nicht nur über einzelne Spalten sondern beide gleichzeit, wenn angegeben
 	@Override
 	public void initDBConnection(Index... indizes) {
 		try {
@@ -241,18 +240,6 @@ public class HSQL_Controller implements DB_Controller {
 				psAnrufe = null;
 			}
 		}
-	}
-	
-	@Override
-	public void storeObject(Object o) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public Query query() {
-		// TODO Auto-generated method stub
-		return null;
 	}
 
 	@Override

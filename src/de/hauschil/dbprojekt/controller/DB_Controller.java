@@ -14,9 +14,7 @@ public interface DB_Controller {
 	public void initDBConnection(Index... indizes);
 	public void createTables();
 	public void dropTables();
-	public void storeObject(Object o);
 	public void commit();
-	public Query query();
 	public void closeDBConncetion();
 	public void storeKunden(Kunde[] k);
 	public void storeAnrufe(Anruf[] a);

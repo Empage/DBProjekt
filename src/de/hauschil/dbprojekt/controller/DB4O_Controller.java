@@ -28,11 +28,6 @@ public class DB4O_Controller implements DB_Controller {
 	}
 
 	@Override
-	public void storeObject(Object o) {
-		db.store(o);
-	}
-
-	@Override
 	public void commit() {
 		db.commit();
 	}
@@ -40,11 +35,6 @@ public class DB4O_Controller implements DB_Controller {
 	@Override
 	public void closeDBConncetion() {
 		db.close();
-	}
-
-	@Override
-	public Query query() {
-		return db.query();
 	}
 
 	@Override

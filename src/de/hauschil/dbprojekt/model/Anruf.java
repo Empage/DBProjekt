@@ -60,10 +60,10 @@ public class Anruf {
 		float fortschritt = 2.0f;
 		System.out.println("                     10   20   30   40   50   60   70   80   90  100");
 		System.out.print("Generiere Anrufe: ");
+		Anruf[] an = new Anruf[anzahlProMonat * 12];
+		Kunde[] partner = new Kunde[ANZ_PARTNER];
 		/* mache fuer jeden Kunden folgendes */
 		for (int i = 0; i < kunden.length; i++) {
-			Anruf[] an = new Anruf[anzahlProMonat * 12];
-			Kunde[] partner = new Kunde[ANZ_PARTNER];
 			/* Generiere erst die Partner */
 			for (int j = 0; j < ANZ_PARTNER; j++) {
 				partner[j] = kunden[r.nextInt(kunden.length)];
