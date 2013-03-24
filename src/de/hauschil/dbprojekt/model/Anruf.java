@@ -8,6 +8,7 @@ import java.util.Random;
 
 import de.hauschil.dbprojekt.controller.DB4O_Controller;
 import de.hauschil.dbprojekt.controller.DB_Controller;
+import de.hauschil.dbprojekt.controller.HSQL_Controller;
 import static de.hauschil.dbprojekt.anwendungsfaelle.Fallmanager.*;
 
 public class Anruf {
@@ -62,6 +63,9 @@ public class Anruf {
 		System.out.print("Generiere Anrufe: ");
 		Anruf[] an = new Anruf[anzahlProMonat * 12];
 		Kunde[] partner = new Kunde[ANZ_PARTNER];
+		int next_partner;
+		int next_partner_telefon;
+		int next_telefon;
 		/* mache fuer jeden Kunden folgendes */
 		for (int i = 0; i < kunden.length; i++) {
 			/* Generiere erst die Partner */
@@ -72,9 +76,9 @@ public class Anruf {
 			for (int month = 0; month < 12; month++) {
 				/* Nun generiere die Anrufe pro Monat */
 				for (int j = 0; j < anzahlProMonat; j++) {
-					int next_partner = r.nextInt(partner.length);
-					int next_partner_telefon = r.nextInt(partner[next_partner].getTelefone().size());
-					int next_telefon = r.nextInt(kunden[i].getTelefone().size());
+					next_partner = r.nextInt(partner.length);
+					next_partner_telefon = r.nextInt(partner[next_partner].getTelefone().size());
+					next_telefon = r.nextInt(kunden[i].getTelefone().size());
 					an[month * anzahlProMonat + j] = new Anruf(
 						kunden[i].getTelefone().get(next_telefon),
 						partner[next_partner].getTelefone().get(next_partner_telefon),
@@ -86,6 +90,9 @@ public class Anruf {
 			db.storeAnrufe(an);
 			if (i % 100 == 99) {
 				db.commit();
+			}
+			if (i % 1000 == 999) {
+				db.closePStatement();
 			}
 			if (((float) i / kunden.length * 100) > fortschritt) {
 				fortschritt += 2;

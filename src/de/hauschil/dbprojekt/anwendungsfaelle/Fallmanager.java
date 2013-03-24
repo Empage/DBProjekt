@@ -24,7 +24,7 @@ public class Fallmanager {
 	private static long db_size;
 	
 	public static void main(String... args) throws IOException {
-		dbs.add(new DB4O_Controller());
+//		dbs.add(new DB4O_Controller());
 		dbs.add(new HSQL_Controller());		
 		
 		for (DB_Controller db : dbs) {

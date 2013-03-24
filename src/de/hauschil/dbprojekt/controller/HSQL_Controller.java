@@ -8,6 +8,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import static de.hauschil.dbprojekt.anwendungsfaelle.Fallmanager.*;
 
@@ -20,8 +21,8 @@ import de.hauschil.dbprojekt.model.Kunde;
 import de.hauschil.dbprojekt.model.Telefon;
 
 public class HSQL_Controller implements DB_Controller {
-	Connection c = null;
-	PreparedStatement psAnrufe = null;
+	private Connection c = null;
+	private PreparedStatement psAnrufe = null;
 	
 	@Override
 	public void initDBConnection(Index... indizes) {
@@ -125,8 +126,7 @@ public class HSQL_Controller implements DB_Controller {
 			/* Foreign keys auskommentiert, weil sonst automatisch Indizes angelegt werden (eig ja gut, aber nicht für diese Aufgabe ;) ) */
 			stmt.execute(
 				"CREATE TABLE IF NOT EXISTS Telefon (" +
-				"id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY," +
-				"nummer varchar(15) NOT NULL," + 
+				"nummer varchar(15) PRIMARY KEY," + 
 				"id_kunde INTEGER NOT NULL," +
 //				"FOREIGN KEY (id_kunde) REFERENCES Kunde(id)" +
 				")"
@@ -137,8 +137,8 @@ public class HSQL_Controller implements DB_Controller {
 				"id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY," +
 				"dauer INTEGER NOT NULL," +
 				"datum BIGINT NOT NULL," +
-				"id_anrufer INTEGER NOT NULL," +
-				"id_angerufener INTEGER NOT NULL," +
+				"id_anrufer varchar(15) NOT NULL," +
+				"id_angerufener varchar(15) NOT NULL," +
 //				"FOREIGN KEY (id_anrufer) REFERENCES Telefon(id)," +
 //				"FOREIGN KEY (id_angerufener) REFERENCES Telefon(id)" +
 				")"
@@ -190,6 +190,7 @@ public class HSQL_Controller implements DB_Controller {
 	public void storeAnrufe(Anruf[] anrufe) {
 		if (psAnrufe == null) {
 			try {
+				c.setAutoCommit(false);
 				psAnrufe = c.prepareStatement(
 					"INSERT INTO Anruf (dauer, datum, id_anrufer, id_angerufener)" +
 					"VALUES (?, ?, ?, ?)"
@@ -202,16 +203,9 @@ public class HSQL_Controller implements DB_Controller {
 			for (Anruf a : anrufe) {
 				psAnrufe.setInt(1, a.getDauer());
 				psAnrufe.setLong(2, a.getDatum());
-				Statement stmt = c.createStatement();
-				ResultSet rs = stmt.executeQuery("SELECT id FROM Telefon WHERE nummer = '" + a.getAnrufer().toString() + "'");
-				rs.next();
-				psAnrufe.setInt(3, rs.getInt(1));
-				
-				rs = stmt.executeQuery("SELECT id FROM Telefon WHERE nummer = '" + a.getAngerufener().toString() + "'");
-				rs.next();
-				psAnrufe.setInt(4, rs.getInt(1));
+				psAnrufe.setString(3, a.getAnrufer().toString());
+				psAnrufe.setString(4, a.getAngerufener().toString());
 				psAnrufe.addBatch();
-				rs.close();
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -223,6 +217,7 @@ public class HSQL_Controller implements DB_Controller {
 		if (psAnrufe != null) {
 			try {
 				psAnrufe.executeBatch();
+				c.commit();
 			} catch (SQLException e) {
 				e.printStackTrace();
 			}
@@ -234,6 +229,7 @@ public class HSQL_Controller implements DB_Controller {
 		if (psAnrufe != null) {
 			try {
 				psAnrufe.close();
+				c.setAutoCommit(true);
 			} catch (SQLException e) {
 				e.printStackTrace();
 			} finally {
@@ -327,7 +323,7 @@ public class HSQL_Controller implements DB_Controller {
 				rs = stmt.executeQuery(
 					"SELECT t1.nummer as Anrufer, t2.nummer as Angerufener, dauer, datum " +
 					"FROM Anruf a, Telefon t1, Telefon t2 " +
-					"WHERE a.id_anrufer = t1.id AND a.id_angerufener = t2.id " +
+					"WHERE a.id_anrufer = t1.nummer AND a.id_angerufener = t2.nummer " +
 					"AND t1.nummer = '" + anrufer.toString() + "' " +
 					"AND a.datum > " + d1.longValue() +" " +
 					"AND a.datum < " + d2.longValue()
@@ -337,8 +333,8 @@ public class HSQL_Controller implements DB_Controller {
 				rs = stmt.executeQuery(
 					"SELECT t1.nummer as Anrufer, t2.nummer as Angerufener, dauer, datum " +
 					"FROM Anruf a, Telefon t1, Telefon t2 " +
-					"WHERE ((a.id_anrufer = t1.id AND a.id_angerufener = t2.id) " +
-					"OR (a.id_anrufer = t2.id AND a.id_angerufener = t1.id))" +
+					"WHERE ((a.id_anrufer = t1.nummer AND a.id_angerufener = t2.nummer) " +
+					"OR (a.id_anrufer = t2.nummer AND a.id_angerufener = t1.nummer))" +
 					"AND t1.nummer = '" + anrufer.toString() + "'"
 				);
 			} else {
