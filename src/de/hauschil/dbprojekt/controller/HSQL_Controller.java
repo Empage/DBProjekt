@@ -288,7 +288,7 @@ public class HSQL_Controller implements DB_Controller {
 					"ORDER BY nachname ASC, vorname ASC"
 				);
 			}
-			
+
 			while (rs.next()) {
 				k.add(new Kunde(rs.getString(2), rs.getString(3), getTelefoneWithKID(rs.getInt(1))));
 			}
@@ -336,26 +336,44 @@ public class HSQL_Controller implements DB_Controller {
 					"AND a.datum < " + d2.longValue()
 				);
 			/* Fall4 */
-			} else if (anrufer != null && angerufener != null && d1 == null && d2 == null) {
+//			} else if (anrufer != null && angerufener != null && d1 == null && d2 == null) {
+//				rs = stmt.executeQuery(
+//					"SELECT t1.nummer as Anrufer, t2.nummer as Angerufener, dauer, datum " +
+//					"FROM Anruf a, Telefon t1, Telefon t2 " +
+//					"WHERE ((a.id_anrufer = t1.nummer AND a.id_angerufener = t2.nummer) " +
+//					"OR (a.id_anrufer = t2.nummer AND a.id_angerufener = t1.nummer))" +
+//					"AND t1.nummer = '" + anrufer.toString() + "'"
+//				);
+			} else if (anrufer != null && angerufener == null && d1 == null && d2 == null) {
 				rs = stmt.executeQuery(
-					"SELECT t1.nummer as Anrufer, t2.nummer as Angerufener, dauer, datum " +
-					"FROM Anruf a, Telefon t1, Telefon t2 " +
-					"WHERE ((a.id_anrufer = t1.nummer AND a.id_angerufener = t2.nummer) " +
-					"OR (a.id_anrufer = t2.nummer AND a.id_angerufener = t1.nummer))" +
-					"AND t1.nummer = '" + anrufer.toString() + "'"
-				);
+						"SELECT t1.nummer as Anrufer, t2.nummer as Angerufener, dauer, datum " +
+						"FROM Anruf a, Telefon t1, Telefon t2 " +
+						"WHERE (a.id_anrufer = t1.nummer AND a.id_angerufener = t2.nummer) " +
+						"AND t1.nummer = '" + anrufer.toString() + "'"
+					);
+			} else if (anrufer == null && angerufener != null && d1 == null && d2 == null) {
+				rs = stmt.executeQuery(
+						"SELECT t1.nummer as Anrufer, t2.nummer as Angerufener, dauer, datum " +
+						"FROM Anruf a, Telefon t1, Telefon t2 " +
+						"WHERE (a.id_anrufer = t1.nummer AND a.id_angerufener = t2.nummer) " +
+						"AND t1.nummer = '" + angerufener.toString() + "'"
+					);
 			} else {
 				throw new RuntimeException("TODO");
 			}
 			while (rs.next()) {
-				list.add(new Anruf(anrufer, new Telefon(rs.getString(2)), rs.getLong(4), rs.getInt(3)));
+				if (anrufer != null) {
+					list.add(new Anruf(anrufer, new Telefon(rs.getString(2)), rs.getLong(4), rs.getInt(3)));
+				} else {
+					list.add(new Anruf(new Telefon(rs.getString(1)), angerufener, rs.getLong(4), rs.getInt(3)));
+				}
 			}
 			rs.close();
 		} catch (SQLException e) {
 			e.printStackTrace();
 			
 		}
-		
+		System.out.println(list);
 		return list;
 	}
 

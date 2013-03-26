@@ -16,11 +16,12 @@ import de.hauschil.dbprojekt.model.Anruf;
 import de.hauschil.dbprojekt.model.Kunde;
 import de.hauschil.dbprojekt.model.Telefon;
 
-// TODO getrennte Listen für ein- und ausgehende Kontakte
 public class Fall4 {
 	private long[] anfangszeit;
 	private long[] endzeit;
 	private DB_Controller db;
+	/* Anzahl zu überprüfender Kontakte */
+	private final int anz = 1;
 	/* Kontakte, die ans Bundeskriminalamt übergeben werden können */
 	private HashSet<Kunde> kontakte_anrufer = new HashSet<>();
 	private HashSet<Kunde> kontakte_angerufene = new HashSet<>();
@@ -36,29 +37,25 @@ public class Fall4 {
 			new Index(Anruf.class, "anrufer", indexed), 
 			new Index(Anruf.class, "angerufener", indexed)
 		});
-		
 		/* Alle Kunden mit Telefonnummern holen, um schnell das Mapping von Nummer auf Kunde hinzubekommen */
 		ArrayList<Kunde> help = db.getKunden(null, null);
-
-		//TODO anzahl
-		Kunde[] kunden = getKundenFromDb(1);
+		/* beziehe zu überprüfende Kunden aus help-Liste */
+		Kunde[] kunden = new Kunde[anz];
+		for (int i = 0; i < anz; i++) {
+			kunden[i] = help.get(i);
+		}
+		
 		anfangszeit[indexed ? 1 : 0] = System.nanoTime();
 		for (Kunde k : kunden) {
 			System.out.println(k);
 			for (Anruf a : getAnrufeFromDb(k, true)) {
 				kontakte_angerufene.add(getKundeByNumber(help, a.getAngerufener()));
-//				Kunde kontakt = db.getKundeByNumber(a.getAngerufener().toString());
-//				if (!kontakte.contains(kontakt)) {
-//					kontakte.add(kontakt);
-//				}
 			}
 			for (Anruf a : getAnrufeFromDb(k, false)) {
 				kontakte_anrufer.add(getKundeByNumber(help, a.getAnrufer()));
 			}
 		}
 		
-		System.out.println(kontakte_angerufene);
-		System.out.println(kontakte_anrufer);
 		db.closeDBConncetion();
 		endzeit[indexed ? 1 : 0] = System.nanoTime();
 	}
@@ -99,10 +96,12 @@ public class Fall4 {
 		ArrayList<Anruf> list = new ArrayList<>();
 		if (anrufer) {
 			for (Telefon tel : k.getTelefone()) {
+				System.out.println("an" + tel);
 				list.addAll(db.getAnrufe(tel, null, null, null));
 			}
 		} else {
 			for (Telefon tel : k.getTelefone()) {
+				System.out.println("ab" + tel);
 				list.addAll(db.getAnrufe(null, tel, null, null));
 			}
 		}

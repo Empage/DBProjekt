@@ -87,7 +87,9 @@ public class DB4O_Controller implements DB_Controller {
 	public ArrayList<Anruf> getAnrufe(Telefon anrufer, Telefon angerufener, Long d1, Long d2) {
 		ArrayList<Anruf> list = new ArrayList<>();
 		Query query = db.query();
+		System.out.println("hier4");
 		query.constrain(Anruf.class);
+		System.out.println("hier5");
 		/* Fall2 */
 		if (anrufer != null && angerufener == null && d1 != null && d2 != null) {
 			Constraint constraint1 = query.descend("anrufer").constrain(anrufer);
@@ -98,7 +100,9 @@ public class DB4O_Controller implements DB_Controller {
 			Constraint constraint2 = query.descend("datum").constrain(d1.longValue()).greater();
 			query.descend("datum").constrain(d2.longValue()).smaller().and(constraint2);
 		/* Fall 4 */
-		} else if (anrufer != null && angerufener == null && d1 == null && d2 == null) { 
+		} else if (anrufer != null && angerufener == null && d1 == null && d2 == null) {
+			//XXX
+			System.out.println("hier2");
 			query.descend("anrufer").constrain(anrufer);
 //			query.descend("angerufener").constrain(angerufener).or(constraint1);
 		/* Fall 4 */
@@ -108,7 +112,7 @@ public class DB4O_Controller implements DB_Controller {
 		} else {
 			throw new RuntimeException("TODO getAnrufe");
 		}
-			
+			System.out.println("hier3");
 		ObjectSet<Anruf> set = query.execute();
 		list.addAll(set);
 
