@@ -34,12 +34,18 @@ public class Fall4 {
 			new Index(Anruf.class, "anrufer", indexed), 
 			new Index(Anruf.class, "angerufener", indexed)
 		});
+		if (indexed) {
+			System.out.println("Fall4 Index erstellt");
+		}
 		
+		//TODO anzahl
+		System.out.println("hier");
 		Kunde[] kunden = getKundenFromDb(1);
-	
 		anfangszeit[indexed ? 1 : 0] = System.nanoTime();
 		for (Kunde k : kunden) {
+			System.out.println(k);
 			for (Anruf a : getAnrufeFromDb(k)) {
+				System.out.println(a);
 				Kunde kontakt = db.getKundeByNumber(a.getAngerufener().toString());
 				if (!kontakte.contains(kontakt)) {
 					kontakte.add(kontakt);

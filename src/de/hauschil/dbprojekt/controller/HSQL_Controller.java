@@ -23,12 +23,13 @@ import de.hauschil.dbprojekt.model.Telefon;
 public class HSQL_Controller implements DB_Controller {
 	private Connection c = null;
 	private PreparedStatement psAnrufe = null;
+	private final String CON_STR ="jdbc:hsqldb:file:" + HSQL_PATH + "; shutdown=true";
 	
 	@Override
 	public void initDBConnection(Index... indizes) {
 		try {
 			c = DriverManager.getConnection(
-				"jdbc:hsqldb:file:" + HSQL_PATH + "; shutdown=true",
+				CON_STR,
 				"root", "cocacola"
 			);
 			try (Statement st = c.createStatement()) {
@@ -114,6 +115,13 @@ public class HSQL_Controller implements DB_Controller {
 	@Override
 	public void createTables() {
 		try (Statement stmt = c.createStatement()) {
+			/* setzte Größe für Tabellen im Ram auf 1 GiB */
+			stmt.execute("SET FILES CACHE SIZE 1000000"); //kiB
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		
+		try (Statement stmt = c.createStatement()) {
 			/* Erzeuge Tabelle Kunde */
 			stmt.execute(
 				"CREATE TABLE IF NOT EXISTS Kunde (" +
@@ -133,7 +141,7 @@ public class HSQL_Controller implements DB_Controller {
 			);
 			/* erzeuge Tabelle Anruf */
 			stmt.execute(
-				"CREATE TABLE IF NOT EXISTS Anruf (" +
+				"CREATE CACHED TABLE IF NOT EXISTS Anruf (" +
 				"id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY," +
 				"dauer INTEGER NOT NULL," +
 				"datum BIGINT NOT NULL," +
@@ -169,7 +177,6 @@ public class HSQL_Controller implements DB_Controller {
 				ps.setString(1, k.getVorname());
 				ps.setString(2, k.getNachname());
 				ps.execute();
-				
 				try (PreparedStatement ps2 = c.prepareStatement(
 					"INSERT INTO Telefon (nummer, id_kunde)" +
 					"VALUES (?, (SELECT TOP 1 id FROM Kunde ORDER BY id DESC))"
