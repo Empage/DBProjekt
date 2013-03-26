@@ -21,6 +21,7 @@ public class DB4O_Controller implements DB_Controller {
 	@Override
 	public void initDBConnection(Index... indizes) {
 		EmbeddedConfiguration conf = Db4oEmbedded.newConfiguration();
+		conf.file().blockSize(8);
 		for (Index i : indizes) {
 			conf.common().objectClass(i.getIndexClass()).objectField(i.getIndexField()).indexed(i.isIndexed());
 		}
@@ -97,9 +98,13 @@ public class DB4O_Controller implements DB_Controller {
 			Constraint constraint2 = query.descend("datum").constrain(d1.longValue()).greater();
 			query.descend("datum").constrain(d2.longValue()).smaller().and(constraint2);
 		/* Fall 4 */
-		} else if (anrufer != null && angerufener != null && d1 == null && d2 == null) { 
-			Constraint constraint1 = query.descend("anrufer").constrain(anrufer);
-			query.descend("angerufener").constrain(angerufener).or(constraint1);
+		} else if (anrufer != null && angerufener == null && d1 == null && d2 == null) { 
+			query.descend("anrufer").constrain(anrufer);
+//			query.descend("angerufener").constrain(angerufener).or(constraint1);
+		/* Fall 4 */
+		} else if (anrufer == null && angerufener != null && d1 == null && d2 == null) { 
+//			query.descend("anrufer").constrain(anrufer);
+			query.descend("angerufener").constrain(angerufener);
 		} else {
 			throw new RuntimeException("TODO getAnrufe");
 		}

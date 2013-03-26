@@ -1,6 +1,7 @@
 package de.hauschil.dbprojekt.anwendungsfaelle;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Random;
 
 import com.db4o.Db4oEmbedded;
@@ -21,7 +22,8 @@ public class Fall4 {
 	private long[] endzeit;
 	private DB_Controller db;
 	/* Kontakte, die ans Bundeskriminalamt übergeben werden können */
-	private ArrayList<Kunde> kontakte = new ArrayList<>();
+	private HashSet<Kunde> kontakte_anrufer = new HashSet<>();
+	private HashSet<Kunde> kontakte_angerufene = new HashSet<>();
 	
 	public Fall4(DB_Controller db) {
 		this.db = db;
@@ -34,24 +36,29 @@ public class Fall4 {
 			new Index(Anruf.class, "anrufer", indexed), 
 			new Index(Anruf.class, "angerufener", indexed)
 		});
-		if (indexed) {
-			System.out.println("Fall4 Index erstellt");
-		}
 		
+		/* Alle Kunden mit Telefonnummern holen, um schnell das Mapping von Nummer auf Kunde hinzubekommen */
+		ArrayList<Kunde> help = db.getKunden(null, null);
+
 		//TODO anzahl
-		System.out.println("hier");
 		Kunde[] kunden = getKundenFromDb(1);
 		anfangszeit[indexed ? 1 : 0] = System.nanoTime();
 		for (Kunde k : kunden) {
 			System.out.println(k);
-			for (Anruf a : getAnrufeFromDb(k)) {
-				System.out.println(a);
-				Kunde kontakt = db.getKundeByNumber(a.getAngerufener().toString());
-				if (!kontakte.contains(kontakt)) {
-					kontakte.add(kontakt);
-				}
+			for (Anruf a : getAnrufeFromDb(k, true)) {
+				kontakte_angerufene.add(getKundeByNumber(help, a.getAngerufener()));
+//				Kunde kontakt = db.getKundeByNumber(a.getAngerufener().toString());
+//				if (!kontakte.contains(kontakt)) {
+//					kontakte.add(kontakt);
+//				}
+			}
+			for (Anruf a : getAnrufeFromDb(k, false)) {
+				kontakte_anrufer.add(getKundeByNumber(help, a.getAnrufer()));
 			}
 		}
+		
+		System.out.println(kontakte_angerufene);
+		System.out.println(kontakte_anrufer);
 		db.closeDBConncetion();
 		endzeit[indexed ? 1 : 0] = System.nanoTime();
 	}
@@ -64,6 +71,15 @@ public class Fall4 {
 	public String toString() {
 		return "Fall4 ohne Index: " + getTime(0) + " ms\n" +
 			   "Fall4  mit Index: " + getTime(1) + " ms";
+	}
+	
+	private Kunde getKundeByNumber(ArrayList<Kunde> kunden, Telefon tel) {
+		for (Kunde k : kunden) {
+			if (k.getTelefone().contains(tel)) {
+				return k;
+			}
+		}
+		return null;
 	}
 	
 	private Kunde[] getKundenFromDb(int count) {
@@ -79,12 +95,17 @@ public class Fall4 {
 		return k;
 	}
 	
-	public ArrayList<Anruf> getAnrufeFromDb(Kunde k) {
+	public ArrayList<Anruf> getAnrufeFromDb(Kunde k, boolean anrufer) {
 		ArrayList<Anruf> list = new ArrayList<>();
-		for (Telefon tel : k.getTelefone()) {
-			list.addAll(db.getAnrufe(tel, tel, null, null));
+		if (anrufer) {
+			for (Telefon tel : k.getTelefone()) {
+				list.addAll(db.getAnrufe(tel, null, null, null));
+			}
+		} else {
+			for (Telefon tel : k.getTelefone()) {
+				list.addAll(db.getAnrufe(null, tel, null, null));
+			}
 		}
-		
 		return list;
 	}
 }

@@ -114,4 +114,42 @@ public class Anruf {
 		
 		return cal.getTimeInMillis();
 	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result
+				+ ((angerufener == null) ? 0 : angerufener.hashCode());
+		result = prime * result + ((anrufer == null) ? 0 : anrufer.hashCode());
+		result = prime * result + (int) (datum ^ (datum >>> 32));
+		result = prime * result + dauer;
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Anruf other = (Anruf) obj;
+		if (angerufener == null) {
+			if (other.angerufener != null)
+				return false;
+		} else if (!angerufener.equals(other.angerufener))
+			return false;
+		if (anrufer == null) {
+			if (other.anrufer != null)
+				return false;
+		} else if (!anrufer.equals(other.anrufer))
+			return false;
+		if (datum != other.datum)
+			return false;
+		if (dauer != other.dauer)
+			return false;
+		return true;
+	}
 }

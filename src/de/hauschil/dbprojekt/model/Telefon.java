@@ -31,4 +31,29 @@ public class Telefon {
 		
 		return tels;
 	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((nummer == null) ? 0 : nummer.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Telefon other = (Telefon) obj;
+		if (nummer == null) {
+			if (other.nummer != null)
+				return false;
+		} else if (!nummer.equals(other.nummer))
+			return false;
+		return true;
+	}
 }
