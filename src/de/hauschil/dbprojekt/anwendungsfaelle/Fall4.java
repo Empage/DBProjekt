@@ -47,7 +47,6 @@ public class Fall4 {
 		
 		anfangszeit[indexed ? 1 : 0] = System.nanoTime();
 		for (Kunde k : kunden) {
-			System.out.println(k);
 			for (Anruf a : getAnrufeFromDb(k, true)) {
 				kontakte_angerufene.add(getKundeByNumber(help, a.getAngerufener()));
 			}
@@ -96,12 +95,10 @@ public class Fall4 {
 		ArrayList<Anruf> list = new ArrayList<>();
 		if (anrufer) {
 			for (Telefon tel : k.getTelefone()) {
-				System.out.println("an" + tel);
 				list.addAll(db.getAnrufe(tel, null, null, null));
 			}
 		} else {
 			for (Telefon tel : k.getTelefone()) {
-				System.out.println("ab" + tel);
 				list.addAll(db.getAnrufe(null, tel, null, null));
 			}
 		}

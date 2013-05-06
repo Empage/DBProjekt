@@ -322,16 +322,14 @@ public class HSQL_Controller implements DB_Controller {
 	@Override
 	public ArrayList<Anruf> getAnrufe(Telefon anrufer, Telefon angerufener, Long d1, Long d2) {
 		ArrayList<Anruf> list = new ArrayList<>();
-		
 		/* Fall2 */
 		try (Statement stmt = c.createStatement()) {
 			ResultSet rs = null;
 			if (anrufer != null && angerufener == null && d1 != null && d2 != null) {
 				rs = stmt.executeQuery(
-					"SELECT t1.nummer as Anrufer, t2.nummer as Angerufener, dauer, datum " +
-					"FROM Anruf a, Telefon t1, Telefon t2 " +
-					"WHERE a.id_anrufer = t1.nummer AND a.id_angerufener = t2.nummer " +
-					"AND t1.nummer = '" + anrufer.toString() + "' " +
+					"SELECT a.id_anrufer, a.id_angerufener, dauer, datum " +
+					"FROM Anruf a " +
+					"WHERE a.id_anrufer = '" + anrufer.toString() + "' " +
 					"AND a.datum > " + d1.longValue() +" " +
 					"AND a.datum < " + d2.longValue()
 				);
@@ -346,17 +344,15 @@ public class HSQL_Controller implements DB_Controller {
 //				);
 			} else if (anrufer != null && angerufener == null && d1 == null && d2 == null) {
 				rs = stmt.executeQuery(
-						"SELECT t1.nummer as Anrufer, t2.nummer as Angerufener, dauer, datum " +
-						"FROM Anruf a, Telefon t1, Telefon t2 " +
-						"WHERE (a.id_anrufer = t1.nummer AND a.id_angerufener = t2.nummer) " +
-						"AND t1.nummer = '" + anrufer.toString() + "'"
+						"SELECT a.id_anrufer as Anrufer,  a.id_angerufener as Angerufener, dauer, datum " +
+						"FROM Anruf a " +
+						"WHERE a.id_anrufer = '" + anrufer.toString() + "'"
 					);
 			} else if (anrufer == null && angerufener != null && d1 == null && d2 == null) {
 				rs = stmt.executeQuery(
-						"SELECT t1.nummer as Anrufer, t2.nummer as Angerufener, dauer, datum " +
-						"FROM Anruf a, Telefon t1, Telefon t2 " +
-						"WHERE (a.id_anrufer = t1.nummer AND a.id_angerufener = t2.nummer) " +
-						"AND t1.nummer = '" + angerufener.toString() + "'"
+						"SELECT a.id_anrufer as Anrufer, a.id_angerufener as Angerufener, dauer, datum " +
+						"FROM Anruf a " +
+						"WHERE a.id_angerufener = '" + angerufener.toString() + "'"
 					);
 			} else {
 				throw new RuntimeException("TODO");
@@ -373,7 +369,6 @@ public class HSQL_Controller implements DB_Controller {
 			e.printStackTrace();
 			
 		}
-		System.out.println(list);
 		return list;
 	}
 
