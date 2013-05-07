@@ -4,12 +4,6 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 
-import com.db4o.Db4oEmbedded;
-import com.db4o.ObjectSet;
-import com.db4o.config.EmbeddedConfiguration;
-import com.db4o.query.Constraint;
-import com.db4o.query.Query;
-
 import de.hauschil.dbprojekt.controller.DB_Controller;
 import de.hauschil.dbprojekt.controller.Index;
 import de.hauschil.dbprojekt.model.Anruf;

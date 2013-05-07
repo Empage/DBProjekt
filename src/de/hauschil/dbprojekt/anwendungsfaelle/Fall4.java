@@ -2,13 +2,6 @@ package de.hauschil.dbprojekt.anwendungsfaelle;
 
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Random;
-
-import com.db4o.Db4oEmbedded;
-import com.db4o.ObjectSet;
-import com.db4o.config.EmbeddedConfiguration;
-import com.db4o.query.Constraint;
-import com.db4o.query.Query;
 
 import de.hauschil.dbprojekt.controller.DB_Controller;
 import de.hauschil.dbprojekt.controller.Index;
@@ -76,19 +69,6 @@ public class Fall4 {
 			}
 		}
 		return null;
-	}
-	
-	private Kunde[] getKundenFromDb(int count) {
-		Random r = new Random(1337);
-		Kunde[] k = new Kunde[count];
-		
-		ArrayList<Kunde> list = db.getKunden(null, null);
-		
-		for (int i = 0; i < count; i++) {
-			k[i] = list.get(r.nextInt(list.size()));
-		}
-		
-		return k;
 	}
 	
 	public ArrayList<Anruf> getAnrufeFromDb(Kunde k, boolean anrufer) {

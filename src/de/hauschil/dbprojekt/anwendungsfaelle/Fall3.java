@@ -1,22 +1,12 @@
 package de.hauschil.dbprojekt.anwendungsfaelle;
 
-import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.GregorianCalendar;
-
-import com.db4o.Db4oEmbedded;
-import com.db4o.ObjectSet;
-import com.db4o.config.EmbeddedConfiguration;
-import com.db4o.query.Constraint;
-import com.db4o.query.Query;
 
 import de.hauschil.dbprojekt.controller.DB_Controller;
 import de.hauschil.dbprojekt.controller.Index;
 import de.hauschil.dbprojekt.model.Anruf;
-import de.hauschil.dbprojekt.model.Kunde;
 
-//XXX Fall3 done, aber ohne Index isses schneller oO
 public class Fall3 {
 	private long[] anfangszeit;
 	private long[] endzeit;

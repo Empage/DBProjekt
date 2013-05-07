@@ -4,7 +4,6 @@ import de.hauschil.dbprojekt.controller.DB_Controller;
 import de.hauschil.dbprojekt.controller.Index;
 import de.hauschil.dbprojekt.model.Kunde;
 
-//XXX Fall1 done
 public class Fall1 {
 	private long[] anfangszeit;
 	private long[] endzeit;

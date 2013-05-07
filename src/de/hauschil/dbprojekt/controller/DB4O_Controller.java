@@ -34,32 +34,26 @@ public class DB4O_Controller implements DB_Controller {
 	public void commit() {
 		db.commit();
 	}
-
 	@Override
 	public void closeDBConncetion() {
 		db.close();
 	}
-
 	@Override
 	public void createTables() {
 		/* wird nicht benötigt für db4o */
 	}
-
 	@Override
 	public void dropTables() {
 		/* wird nicht benötigt für db4o */
 	}
-
 	@Override
 	public void storeKunden(Kunde[] k) {
 		db.store(k);
 	}
-
 	@Override
 	public void storeAnrufe(Anruf[] a) {
 		db.store(a);
 	}
-
 	@Override
 	public void closePStatement() {
 		/* wird nicht benötigt für db4o */
@@ -102,10 +96,8 @@ public class DB4O_Controller implements DB_Controller {
 		/* Fall 4 */
 		} else if (anrufer != null && angerufener == null && d1 == null && d2 == null) {
 			query.descend("anrufer").constrain(anrufer);
-//			query.descend("angerufener").constrain(angerufener).or(constraint1);
 		/* Fall 4 */
 		} else if (anrufer == null && angerufener != null && d1 == null && d2 == null) { 
-//			query.descend("anrufer").constrain(anrufer);
 			query.descend("angerufener").constrain(angerufener);
 		} else {
 			throw new RuntimeException("TODO getAnrufe");

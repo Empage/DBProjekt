@@ -1,7 +1,6 @@
 package de.hauschil.dbprojekt.model;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Random;
 
 import de.hauschil.dbprojekt.controller.Helper;
@@ -102,6 +101,4 @@ public class Kunde {
 			return false;
 		return true;
 	}
-	
-	
 }

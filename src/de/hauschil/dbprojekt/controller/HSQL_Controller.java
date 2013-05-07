@@ -1,20 +1,14 @@
 package de.hauschil.dbprojekt.controller;
 
+import static de.hauschil.dbprojekt.anwendungsfaelle.Fallmanager.HSQL_PATH;
+
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.HashMap;
-
-import static de.hauschil.dbprojekt.anwendungsfaelle.Fallmanager.*;
-
-import com.db4o.config.EmbeddedConfiguration;
-import com.db4o.query.Constraint;
-import com.db4o.query.Query;
 
 import de.hauschil.dbprojekt.model.Anruf;
 import de.hauschil.dbprojekt.model.Kunde;
@@ -30,7 +24,7 @@ public class HSQL_Controller implements DB_Controller {
 		try {
 			c = DriverManager.getConnection(
 				CON_STR,
-				"root", "cocacola"
+				"root", "password"
 			);
 			try (Statement st = c.createStatement()) {
 				/* Spezielle Variante für diese Testcases */
@@ -136,6 +130,7 @@ public class HSQL_Controller implements DB_Controller {
 				"CREATE TABLE IF NOT EXISTS Telefon (" +
 				"nummer varchar(15) PRIMARY KEY," + 
 				"id_kunde INTEGER NOT NULL," +
+				/* auskommentiert, damit nicht automatisch ein Index erzeugt wird */
 //				"FOREIGN KEY (id_kunde) REFERENCES Kunde(id)" +
 				")"
 			);
@@ -147,6 +142,7 @@ public class HSQL_Controller implements DB_Controller {
 				"datum BIGINT NOT NULL," +
 				"id_anrufer varchar(15) NOT NULL," +
 				"id_angerufener varchar(15) NOT NULL," +
+				/* auskommentiert, damit nicht automatisch ein Index erzeugt wird */
 //				"FOREIGN KEY (id_anrufer) REFERENCES Telefon(id)," +
 //				"FOREIGN KEY (id_angerufener) REFERENCES Telefon(id)" +
 				")"
@@ -334,14 +330,6 @@ public class HSQL_Controller implements DB_Controller {
 					"AND a.datum < " + d2.longValue()
 				);
 			/* Fall4 */
-//			} else if (anrufer != null && angerufener != null && d1 == null && d2 == null) {
-//				rs = stmt.executeQuery(
-//					"SELECT t1.nummer as Anrufer, t2.nummer as Angerufener, dauer, datum " +
-//					"FROM Anruf a, Telefon t1, Telefon t2 " +
-//					"WHERE ((a.id_anrufer = t1.nummer AND a.id_angerufener = t2.nummer) " +
-//					"OR (a.id_anrufer = t2.nummer AND a.id_angerufener = t1.nummer))" +
-//					"AND t1.nummer = '" + anrufer.toString() + "'"
-//				);
 			} else if (anrufer != null && angerufener == null && d1 == null && d2 == null) {
 				rs = stmt.executeQuery(
 						"SELECT a.id_anrufer as Anrufer,  a.id_angerufener as Angerufener, dauer, datum " +

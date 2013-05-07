@@ -1,15 +1,13 @@
 package de.hauschil.dbprojekt.model;
 
-import java.text.DateFormat;
+import static de.hauschil.dbprojekt.anwendungsfaelle.Fallmanager.ANZ_KUNDEN;
+import static de.hauschil.dbprojekt.anwendungsfaelle.Fallmanager.ANZ_PARTNER;
+
 import java.util.Calendar;
-import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.Random;
 
-import de.hauschil.dbprojekt.controller.DB4O_Controller;
 import de.hauschil.dbprojekt.controller.DB_Controller;
-import de.hauschil.dbprojekt.controller.HSQL_Controller;
-import static de.hauschil.dbprojekt.anwendungsfaelle.Fallmanager.*;
 
 public class Anruf {
 	private static Random r = new Random(42);

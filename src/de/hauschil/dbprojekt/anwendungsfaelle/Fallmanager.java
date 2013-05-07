@@ -19,13 +19,12 @@ public class Fallmanager {
 	public static final int ANZ_ANRUFPM	= 3 * FAKTOR;
 	public static final String DB4O_PATH =		"D:\\tmp\\db\\telefongesellschaft.db4o";
 	public static final String HSQL_PATH =		"D:\\tmp\\db\\telefongesellschaft.hsql";
-	public static final String SQLITE_PATH =	"D:\\tmp\\db\\telefongesellschaft.sqlite";
 	
 	private static ArrayList<DB_Controller> dbs = new ArrayList<>();
 	private static long db_size;
 	
 	public static void main(String... args) throws IOException {
-//		dbs.add(new DB4O_Controller());
+		dbs.add(new DB4O_Controller());
 		dbs.add(new HSQL_Controller());		
 		
 		for (DB_Controller db : dbs) {
@@ -35,29 +34,28 @@ public class Fallmanager {
 			System.out.println((System.currentTimeMillis() - timer) / 1000 + " seks setuptime");
 			System.out.println("DB size: " + db_size / 1024 + " kiB");
 			
-//			Fall1 f1 = new Fall1(db);
-//			f1.run(true);
-//			f1.run(false);
-//			System.out.println(f1);
-			
-//			Fall4 f4 = new Fall4(db);
-//			f4.run(true);
-//			f4.run(false);
-//			System.out.println(f4);
+			Fall1 f1 = new Fall1(db);
+			f1.run(true);
+			f1.run(false);
+			System.out.println(f1);
 			
 			Fall2 f2 = new Fall2(db);
-//			f2.run(true);
+			f2.run(true);
 			/* Benötigt bei Faktor 10 schon über eine halbe Stunde */
 			f2.run(false);
 			System.out.println(f2);
 			
+			Fall4 f4 = new Fall4(db);
+			f4.run(true);
+			f4.run(false);
+			System.out.println(f4);
 			
 			/* Fall3 als letztes, weil er Sachen löscht, deshalb muss auch neu generiert werden */
-//			Fall3 f3 = new Fall3(db);
-//			f3.run(true);
-//			setUp(db);
-//			f3.run(false);
-//			System.out.println(f3);
+			Fall3 f3 = new Fall3(db);
+			f3.run(true);
+			setUp(db);
+			f3.run(false);
+			System.out.println(f3);
 		}
 	}
 	
@@ -82,7 +80,6 @@ public class Fallmanager {
 		db.initDBConnection();
 		
 		if (db instanceof HSQL_Controller) {
-//			db.dropTables();
 			db.createTables();
 		}
 		
@@ -96,7 +93,6 @@ public class Fallmanager {
 		try {
 			Thread.sleep(100);
 		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		db_size = Files.size(dbPath);
